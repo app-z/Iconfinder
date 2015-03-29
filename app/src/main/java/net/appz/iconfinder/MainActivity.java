@@ -63,10 +63,14 @@ public class MainActivity extends ActionBarActivity
 
     private Styles styles;
 
+    RequestQueue requestQueue;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        requestQueue = Volley.newRequestQueue(this);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -80,7 +84,6 @@ public class MainActivity extends ActionBarActivity
         urlStyles += "?_=" + new Random().nextInt();
         Log.d(TAG, "Request => " + urlStyles);
 
-        RequestQueue queue = Volley.newRequestQueue(this);
 
         final GsonRequest gsonRequest = new GsonRequest(urlStyles, Styles.class, null, new Response.Listener<Styles>() {
             @Override
@@ -94,7 +97,8 @@ public class MainActivity extends ActionBarActivity
                     Log.e(TAG, volleyError.getMessage());
             }
         });
-        queue.add(gsonRequest);
+        gsonRequest.setTag("Styles");
+        requestQueue.add(gsonRequest);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
@@ -144,7 +148,6 @@ public class MainActivity extends ActionBarActivity
     public void onNavigationDrawerItemSelected(final int position) {
 
         if(styles != null ) {
-            RequestQueue queue = Volley.newRequestQueue(this);
             // Download Iconsets
             urlIconsets = String.format(urlIconsetsTmpl, styles.getStyles().get(position).getIdentifier());
             Log.d(TAG, "urlIconsets = " + urlIconsets);
@@ -160,7 +163,8 @@ public class MainActivity extends ActionBarActivity
                         Log.e(TAG, volleyError.getMessage());
                 }
             });
-            queue.add(gsonRequest);
+            gsonRequest.setTag("Iconsets");
+            requestQueue.add(gsonRequest);
         }
 
 
@@ -188,8 +192,6 @@ public class MainActivity extends ActionBarActivity
 
      */
     public void onQueryIcons(String urlIcons) {
-
-        RequestQueue queue = Volley.newRequestQueue(this);
         final GsonRequest gsonRequest = new GsonRequest(urlIcons, Icons.class, null, new Response.Listener<Icons>() {
             @Override
             public void onResponse(Icons icons) {
@@ -205,9 +207,17 @@ public class MainActivity extends ActionBarActivity
                     Log.e(TAG, "Error:" + volleyError.getMessage());
             }
         });
-        queue.add(gsonRequest);
+        gsonRequest.setTag("Icons");
+        requestQueue.add(gsonRequest);
     }
 
+    @Override
+    protected void onStop () {
+        super.onStop();
+        if (requestQueue != null) {
+            requestQueue.cancelAll(this);
+        }
+    }
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
