@@ -48,7 +48,7 @@ public class IconsGridFragment extends Fragment {
         // get listview current position - used to maintain scroll position
         int currentPosition = gridView.getFirstVisiblePosition();
 
-        gridView.setAdapter(new IconsGreedAdapter(getActivity(), icons.getIcons()));
+        gridView.setAdapter(new IconsGridAdapter(getActivity(), icons.getIcons()));
         // Setting new scroll position
         gridView.setSelection(currentPosition + 1);
 

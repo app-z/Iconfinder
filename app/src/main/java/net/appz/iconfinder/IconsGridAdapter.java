@@ -22,11 +22,11 @@ import java.util.List;
 /**
  * Created by App-z.net on 29.03.15.
  */
-public class IconsGreedAdapter extends ArrayAdapter<Icon> {
+public class IconsGridAdapter extends ArrayAdapter<Icon> {
 
     private int minimum_size;
 
-    public IconsGreedAdapter(Context context, List<Icon> icon) {
+    public IconsGridAdapter(Context context, List<Icon> icon) {
         super(context, 0, icon);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
