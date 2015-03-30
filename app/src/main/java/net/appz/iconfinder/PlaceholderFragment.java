@@ -18,7 +18,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 
-import net.appz.iconfinder.Data.Iconset;
 import net.appz.iconfinder.Data.Iconsets;
 
 import java.util.ArrayList;
@@ -67,6 +66,9 @@ public class PlaceholderFragment extends ListFragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         queryText = (EditText) rootView.findViewById(R.id.queryText);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String query = prefs.getString("query", "facebook");
+        queryText.setText(query);
 
         Bundle b = getArguments();
         section = b.getInt(ARG_SECTION_NUMBER);
@@ -75,24 +77,30 @@ public class PlaceholderFragment extends ListFragment {
         Button btnSearch = (Button) rootView.findViewById(R.id.btnSearh);
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String urlIcons;
+                String query = queryText.getText().toString();
+                if(query.trim().length() == 0){
+                    AppUtils.showDialog(getActivity(), "Input empty", "Request empty", false);
+                }else {
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("query", query).commit();
 
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                int minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
-                int maximum_size = Integer.valueOf(prefs.getString("maximum_size_list", "512"));
+                    String urlIcons;
+                    int minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
+                    int maximum_size = Integer.valueOf(prefs.getString("maximum_size_list", "512"));
 
-                urlIcons = String.format(urlIconsTmpl, queryText.getText(),
-                        minimum_size,
-                        maximum_size);
+                    urlIcons = String.format(urlIconsTmpl, queryText.getText(),
+                            minimum_size,
+                            maximum_size);
 
-                if(iconsets != null) {
-                    urlIcons += "&style=" + iconsets.getIconsets().get(section).getStyles().get(0).getIdentifier();
+                    if (iconsets != null) {
+                        urlIcons += "&style=" + iconsets.getIconsets().get(section).getStyles().get(0).getIdentifier();
+                    }
+
+                    Log.d(">>>", "urlIcons = " + urlIcons);
+                    ((MainActivity) getActivity()).onQueryIcons(urlIcons);
                 }
-
-                Log.d(">>>", "urlIcons = " + urlIcons);
-                ((MainActivity) getActivity()).onQueryIcons(urlIcons);
             }
-
         });
 
 
@@ -106,11 +114,6 @@ public class PlaceholderFragment extends ListFragment {
             mListView = (AbsListView) rootView.findViewById(android.R.id.list);
             ((AdapterView) mListView).setAdapter(mAdapter);
 
-
-            for(Iconset iconset : iconsets.getIconsets()){
-                Log.d(">>>", iconset.getName());
-            }
-
         }
         return rootView;
     }
@@ -119,7 +122,7 @@ public class PlaceholderFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((MainActivity) activity).onSectionAttached(
-                getArguments().getInt(ARG_SECTION_NUMBER));
+            ((MainActivity) activity).onSectionAttached(
+                    getArguments().getInt(ARG_SECTION_NUMBER));
     }
 }

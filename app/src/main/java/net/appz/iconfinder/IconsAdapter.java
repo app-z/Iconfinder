@@ -19,7 +19,7 @@ import net.appz.iconfinder.Data.RasterSize;
 import java.util.List;
 
 /**
- * Created by spbmap on 29.03.15.
+ * Created by App-z.net on 29.03.15.
  */
 public class IconsAdapter extends ArrayAdapter<Icon> {
 
@@ -48,7 +48,6 @@ public class IconsAdapter extends ArrayAdapter<Icon> {
         List<RasterSize> rasterSizes = icon.getRasterSizes();
 
         if(rasterSizes != null ){
-
             for (RasterSize rasterSize : rasterSizes) {
                 if(rasterSize.getSize() >= minimum_size){
                     String imgUrl = rasterSize.getFormats().get(0).getPreviewUrl();
@@ -57,7 +56,6 @@ public class IconsAdapter extends ArrayAdapter<Icon> {
                     break;
                 }
             }
-
         }
 
         return convertView;

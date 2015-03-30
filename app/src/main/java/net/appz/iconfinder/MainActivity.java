@@ -2,6 +2,7 @@ package net.appz.iconfinder;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -18,7 +19,6 @@ import com.android.volley.toolbox.Volley;
 
 import net.appz.iconfinder.Data.Icon;
 import net.appz.iconfinder.Data.Icons;
-import net.appz.iconfinder.Data.Iconset;
 import net.appz.iconfinder.Data.Iconsets;
 import net.appz.iconfinder.Data.Style;
 import net.appz.iconfinder.Data.Styles;
@@ -89,9 +89,13 @@ public class MainActivity extends ActionBarActivity
         requestQueue.add(gsonRequest);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
-                .commit();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+        Log.e(TAG, "currentFragment = " + currentFragment);
+        if(currentFragment == null) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
+                    .commit();
+        }
     }
 
     private void fillStyles(Styles styles) {
@@ -114,9 +118,10 @@ public class MainActivity extends ActionBarActivity
     }
 
     private void fillIconSets(Iconsets iconsets, final int position) {
-        for(Iconset iconset : iconsets.getIconsets()){
-            Log.d(TAG, iconset.getName());
-        }
+        mTitle = styles.getStyles().get(position).getName();
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(mTitle);
+
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
@@ -134,7 +139,6 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(final int position) {
-
         if(styles != null ) {
             // Download Iconsets
             urlIconsets = String.format(urlIconsetsTmpl, styles.getStyles().get(position).getIdentifier());
@@ -154,24 +158,28 @@ public class MainActivity extends ActionBarActivity
             gsonRequest.setTag("Iconsets");
             requestQueue.add(gsonRequest);
         }
-
-
     }
 
     @Override
     public void onOptionsItemSelectedReset() {
+        mTitle = getResources().getString(R.string.app_name);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(mTitle);
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
                 .commit();
+
     }
 
     public void onSectionAttached(int position) {
+        /*
         if(styles != null && mTitle != null) {
             mTitle = styles.getStyles().get(position).getName();
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setTitle(mTitle);
             Log.d(TAG, "Title = " + mTitle.toString());
-
-        }
+        }*/
     }
 
     /*
@@ -183,9 +191,6 @@ public class MainActivity extends ActionBarActivity
         final GsonRequest gsonRequest = new GsonRequest(urlIcons, Icons.class, null, new Response.Listener<Icons>() {
             @Override
             public void onResponse(Icons icons) {
-                for (Icon icon : icons.getIcons()){
-                    Log.d(TAG, icon.getType() + " : " + icon.getIconId());
-                }
                 fillIcons(icons);
             }
         }, new Response.ErrorListener() {
@@ -197,6 +202,12 @@ public class MainActivity extends ActionBarActivity
         });
         gsonRequest.setTag("Icons");
         requestQueue.add(gsonRequest);
+    }
+
+
+
+    public void onClickIcon(Icon icon) {
+
     }
 
     @Override
@@ -230,9 +241,6 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
@@ -243,7 +251,5 @@ public class MainActivity extends ActionBarActivity
 
         return super.onOptionsItemSelected(item);
     }
-
-
 
 }

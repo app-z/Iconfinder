@@ -3,10 +3,9 @@ package net.appz.iconfinder;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import net.appz.iconfinder.Data.Icons;
@@ -18,6 +17,8 @@ public class IconsGridFragment extends Fragment {
 
 
     private static final String ARG_ICONS = "icons";
+
+    Icons icons;
 
     /**
      * Returns a new instance of this fragment
@@ -43,20 +44,20 @@ public class IconsGridFragment extends Fragment {
         GridView gridView = (GridView) rootView.findViewById(R.id.gridView1);
 
         Bundle b = getArguments();
-        Icons icon = b.getParcelable(ARG_ICONS);
+        icons = b.getParcelable(ARG_ICONS);
 
-        gridView.setAdapter(new IconsAdapter(getActivity(), icon.getIcons()));
+        gridView.setAdapter(new IconsAdapter(getActivity(), icons.getIcons()));
 
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                /*gridView.setOnTouchListener(new View.OnTouchListener(){
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_MOVE){
-                    return true;
-                }
-                return false;
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+
+                ((MainActivity) getActivity()).onClickIcon(icons.getIcons().get(position));
+
             }
-        });*/
+        });
 
         return rootView;
     }
