@@ -1,0 +1,45 @@
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_minimum_size">Minimum size</string>
+    <string-array name="pref_minimum_list_titles">
+        <item>16px</item>
+        <item>32px</item>
+        <item>64px</item>
+        <item>128px</item>
+        <item>256px</item>
+        <item>512px</item>
+    </string-array>
+    <string-array name="pref_minimum_list_values">
+        <item>16</item>
+        <item>32</item>
+        <item>64</item>
+        <item>128</item>
+        <item>256</item>
+        <item>512</item>
+    </string-array>
+
+    <string name="pref_title_maximum_size">Maximum size</string>
+    <string-array name="pref_maximum_list_titles">
+        <item>16px</item>
+        <item>32px</item>
+        <item>64px</item>
+        <item>128px</item>
+        <item>256px</item>
+        <item>512px</item>
+    </string-array>
+    <string-array name="pref_maximum_list_values">
+        <item>16</item>
+        <item>32</item>
+        <item>64</item>
+        <item>128</item>
+        <item>256</item>
+        <item>512</item>
+    </string-array>
+
+</resources>

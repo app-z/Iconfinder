@@ -5,7 +5,9 @@ package net.appz.iconfinder;
  */
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -39,11 +41,8 @@ public class PlaceholderFragment extends ListFragment {
 
     private EditText queryText;
 
-    private static final String urlIconsTmpl1 = "https://api.iconfinder.com"
-            + "/v2/icons/search?query=%s&style=%s";
-
-    private static final String urlIconsTmpl2 = "https://api.iconfinder.com"
-            + "/v2/icons/search?query=%s";
+    private static final String urlIconsTmpl = "https://api.iconfinder.com"
+            + "/v2/icons/search?query=%s&minimum_size=%d&maximum_size=%d&count=100";
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -77,12 +76,19 @@ public class PlaceholderFragment extends ListFragment {
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String urlIcons;
+
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                int minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
+                int maximum_size = Integer.valueOf(prefs.getString("maximum_size_list", "512"));
+
+                urlIcons = String.format(urlIconsTmpl, queryText.getText(),
+                        minimum_size,
+                        maximum_size);
+
                 if(iconsets != null) {
-                    urlIcons = String.format(urlIconsTmpl1, queryText.getText(),
-                            iconsets.getIconsets().get(section).getStyles().get(0).getIdentifier());
-                }else{
-                    urlIcons = String.format(urlIconsTmpl2, queryText.getText());
+                    urlIcons += "&style=" + iconsets.getIconsets().get(section).getStyles().get(0).getIdentifier();
                 }
+
                 Log.d(">>>", "urlIcons = " + urlIcons);
                 ((MainActivity) getActivity()).onQueryIcons(urlIcons);
             }

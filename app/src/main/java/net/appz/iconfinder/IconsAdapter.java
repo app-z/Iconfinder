@@ -1,6 +1,8 @@
 package net.appz.iconfinder;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +14,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import net.appz.iconfinder.Data.Icon;
-import net.appz.iconfinder.Data.Icons;
 import net.appz.iconfinder.Data.RasterSize;
 
 import java.util.List;
@@ -22,10 +23,14 @@ import java.util.List;
  */
 public class IconsAdapter extends ArrayAdapter<Icon> {
 
-    private int minSize = 128;
+    private int minimum_size;
 
     public IconsAdapter(Context context, List<Icon> icon) {
         super(context, 0, icon);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
+
     }
 
 
@@ -43,8 +48,9 @@ public class IconsAdapter extends ArrayAdapter<Icon> {
         List<RasterSize> rasterSizes = icon.getRasterSizes();
 
         if(rasterSizes != null ){
+
             for (RasterSize rasterSize : rasterSizes) {
-                if(rasterSize.getSize() >= minSize){
+                if(rasterSize.getSize() >= minimum_size){
                     String imgUrl = rasterSize.getFormats().get(0).getPreviewUrl();
                     Picasso.with(getContext()).load(imgUrl).into(img);
                     Log.d(">>>", imgUrl);
