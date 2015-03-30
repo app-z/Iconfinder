@@ -9,8 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import net.appz.iconfinder.Data.Icon;
@@ -43,7 +45,8 @@ public class IconsAdapter extends ArrayAdapter<Icon> {
         TextView tvName = (TextView) convertView.findViewById(R.id.grid_item_label);
         tvName.setText(icon.getType());
 
-        ImageView img = (ImageView) convertView.findViewById(R.id.grid_item_image);
+        final ImageView imgView = (ImageView) convertView.findViewById(R.id.grid_item_image);
+        final ProgressBar progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
 
         List<RasterSize> rasterSizes = icon.getRasterSizes();
 
@@ -51,7 +54,16 @@ public class IconsAdapter extends ArrayAdapter<Icon> {
             for (RasterSize rasterSize : rasterSizes) {
                 if(rasterSize.getSize() >= minimum_size){
                     String imgUrl = rasterSize.getFormats().get(0).getPreviewUrl();
-                    Picasso.with(getContext()).load(imgUrl).into(img);
+                    Picasso.with(getContext()).load(imgUrl).into(imgView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            progressBar.setVisibility(View.GONE);
+                        }
+                        @Override
+                        public void onError() {
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
                     Log.d(">>>", imgUrl);
                     break;
                 }

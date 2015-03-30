@@ -5,12 +5,23 @@
     android:orientation="vertical"
     android:padding="4dp">
 
-    <ImageView
-        android:id="@+id/grid_item_image"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/facebook64" >
-    </ImageView>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:indeterminate="false"
+            android:max="100"/>
+        <ImageView
+            android:id="@+id/grid_item_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp" >
+        </ImageView>
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/grid_item_label"
