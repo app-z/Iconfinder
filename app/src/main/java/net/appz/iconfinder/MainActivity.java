@@ -3,7 +3,6 @@ package net.appz.iconfinder;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -199,20 +198,25 @@ public class MainActivity extends ActionBarActivity
 
 
 
-    private void fillIcons(Icons icons, boolean firstPage) {
+    synchronized private void fillIcons(Icons icons, boolean firstPage) {
         Log.d(">>>", "Icons size = " + icons.getIcons().size());
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-        Log.e(TAG, "fillIcons : currentFragment = " + currentFragment);
+        Log.e(TAG, "fillIcons : currentFragment = "
+                + currentFragment
+                + " : isDestroyed = "
+                + fragmentManager.isDestroyed());
 
-        if(currentFragment != null && currentFragment instanceof IconsGridFragment) {
-            ((IconsGridFragment)currentFragment).addIcons(icons);
-        } else {
+        if(!fragmentManager.isDestroyed()) {
+
+            if (currentFragment != null && currentFragment instanceof IconsGridFragment) {
+                ((IconsGridFragment) currentFragment).addIcons(icons);
+            } else {
                 fragmentManager.beginTransaction()
-                    .replace(R.id.container, IconsGridFragment.newInstance(icons))
-                    .commitAllowingStateLoss();
-            fragmentManager.executePendingTransactions();
+                        .replace(R.id.container, IconsGridFragment.newInstance(icons))
+                        .commitAllowingStateLoss();
+            }
         }
     }
 
@@ -280,7 +284,7 @@ public class MainActivity extends ActionBarActivity
         if (requestQueue != null) {
             requestQueue.cancelAll(this);
         }
-        //Log.d(TAG, "onStop");
+        Log.d(TAG, "onStop");
     }
 
     public void restoreActionBar() {
