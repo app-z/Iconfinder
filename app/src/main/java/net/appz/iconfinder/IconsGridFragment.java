@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
@@ -17,8 +18,15 @@ public class IconsGridFragment extends Fragment {
 
 
     private static final String ARG_ICONS = "icons";
+    //private static final String ARG_LOADING_MORE = "loadingMore";
+
+    // Check if new feeds are loading
+    boolean loadingMore = true;
+    boolean stopLoadingData = false;
 
     Icons icons;
+
+    GridView gridView;
 
     /**
      * Returns a new instance of this fragment
@@ -36,17 +44,29 @@ public class IconsGridFragment extends Fragment {
     public IconsGridFragment() {
     }
 
+    public void setAdapter(Icons icons){
+        // get listview current position - used to maintain scroll position
+        int currentPosition = gridView.getFirstVisiblePosition();
+
+        gridView.setAdapter(new IconsGreedAdapter(getActivity(), icons.getIcons()));
+        // Setting new scroll position
+        gridView.setSelection(currentPosition + 1);
+
+        loadingMore = false;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_grid_icons, container, false);
 
-        GridView gridView = (GridView) rootView.findViewById(R.id.gridView1);
+        gridView = (GridView) rootView.findViewById(R.id.gridView1);
 
         Bundle b = getArguments();
         icons = b.getParcelable(ARG_ICONS);
 
-        gridView.setAdapter(new IconsAdapter(getActivity(), icons.getIcons()));
+        setAdapter(icons);
+
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -59,6 +79,28 @@ public class IconsGridFragment extends Fragment {
             }
         });
 
+        // Lazy loader
+        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
+                int lastInScreen = firstVisibleItem + visibleItemCount;
+                if ((lastInScreen == totalItemCount) && !(loadingMore)) {
+
+                    if (!stopLoadingData) {
+                        loadingMore = true;
+                        ((MainActivity) getActivity()).onLazyLoadMore();
+                    }
+
+                }
+            }
+        });
         return rootView;
     }
 }

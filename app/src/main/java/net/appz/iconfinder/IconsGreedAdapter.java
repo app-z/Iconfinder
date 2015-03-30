@@ -3,7 +3,6 @@ package net.appz.iconfinder;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +22,11 @@ import java.util.List;
 /**
  * Created by App-z.net on 29.03.15.
  */
-public class IconsAdapter extends ArrayAdapter<Icon> {
+public class IconsGreedAdapter extends ArrayAdapter<Icon> {
 
     private int minimum_size;
 
-    public IconsAdapter(Context context, List<Icon> icon) {
+    public IconsGreedAdapter(Context context, List<Icon> icon) {
         super(context, 0, icon);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -64,7 +63,7 @@ public class IconsAdapter extends ArrayAdapter<Icon> {
                             progressBar.setVisibility(View.GONE);
                         }
                     });
-                    Log.d(">>>", imgUrl);
+                    // Log.d(">>>", imgUrl);
                     break;
                 }
             }

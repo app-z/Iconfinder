@@ -1,7 +1,9 @@
 package net.appz.iconfinder;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -29,6 +31,8 @@ import java.util.Random;
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+    private String TAG = "MainActivity>";
+
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -44,14 +48,19 @@ public class MainActivity extends ActionBarActivity
     //private String url = "https://api.iconfinder.com/v2/styles?count=10&after=&_=1427589491914";
     private String urlStyles = "https://api.iconfinder.com" + "/v2/styles";
 
-    private static final String urlIconsetsTmpl = "https://api.iconfinder.com" + "/v2/styles/%s/iconsets";
-    private String urlIconsets;
+    private static final String urlIconSetsTmpl = "https://api.iconfinder.com" + "/v2/styles/%s/iconsets";
 
-    private String TAG = "MainActivity>";
+    private static final String urlIconsTmpl = "https://api.iconfinder.com"
+            + "/v2/icons/search?query=%s&minimum_size=%d&maximum_size=%d&count=%d&offset=%d";
+
+    private int count = 20;
+    private int offset = 0;
 
     private Styles styles;
+    private Icons icons;
 
-    RequestQueue requestQueue;
+    // Request for Json Download
+    private RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +77,15 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+        //Log.e(TAG, "currentFragment = " + currentFragment);
+        if(currentFragment == null) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
+                    .commit();
+        }
 
         urlStyles += "?_=" + new Random().nextInt();
         Log.d(TAG, "Request => " + urlStyles);
@@ -88,14 +106,6 @@ public class MainActivity extends ActionBarActivity
         gsonRequest.setTag("Styles");
         requestQueue.add(gsonRequest);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-        Log.e(TAG, "currentFragment = " + currentFragment);
-        if(currentFragment == null) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
-                    .commit();
-        }
     }
 
     private void fillStyles(Styles styles) {
@@ -117,7 +127,10 @@ public class MainActivity extends ActionBarActivity
 
     }
 
+    int stylesPosition = -1;
+
     private void fillIconSets(Iconsets iconsets, final int position) {
+        stylesPosition = position;
         mTitle = styles.getStyles().get(position).getName();
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(mTitle);
@@ -129,19 +142,12 @@ public class MainActivity extends ActionBarActivity
                 .commit();
     }
 
-    private void fillIcons(Icons icons) {
-        // update the main content by replacing fragments
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, IconsGridFragment.newInstance(icons))
-                .commit();
-    }
 
     @Override
     public void onNavigationDrawerItemSelected(final int position) {
         if(styles != null ) {
             // Download Iconsets
-            urlIconsets = String.format(urlIconsetsTmpl, styles.getStyles().get(position).getIdentifier());
+            String urlIconsets = String.format(urlIconSetsTmpl, styles.getStyles().get(position).getIdentifier());
             Log.d(TAG, "urlIconsets = " + urlIconsets);
             final GsonRequest gsonRequest = new GsonRequest(urlIconsets, Iconsets.class, null, new Response.Listener<Iconsets>() {
                 @Override
@@ -162,6 +168,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onOptionsItemSelectedReset() {
+        stylesPosition = -1;
         mTitle = getResources().getString(R.string.app_name);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(mTitle);
@@ -169,7 +176,6 @@ public class MainActivity extends ActionBarActivity
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
                 .commit();
-
     }
 
     public void onSectionAttached(int position) {
@@ -182,16 +188,57 @@ public class MainActivity extends ActionBarActivity
         }*/
     }
 
+
+
+    private void fillIcons(Icons icons, boolean firstPage) {
+        Log.d(">>>", "Icons size = " + icons.getIcons().size());
+
+        if(!firstPage){
+            this.icons.getIcons().addAll(icons.getIcons());
+        }else{
+            this.icons = icons;
+        }
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+        if(currentFragment != null && currentFragment instanceof IconsGridFragment) {
+            ((IconsGridFragment)currentFragment).setAdapter(this.icons);
+        } else {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, IconsGridFragment.newInstance(this.icons))
+                    .commit();
+        }
+    }
+
     /*
 
         Get Icons by query and Stile
 
      */
-    public void onQueryIcons(String urlIcons) {
+    public void onQueryIcons(String query, final boolean firstPage) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
+        int maximum_size = Integer.valueOf(prefs.getString("maximum_size_list", "512"));
+
+        offset = firstPage ? 0 : (offset += count);
+
+        String urlIcons = String.format(urlIconsTmpl, query,
+                minimum_size,
+                maximum_size,
+                count,
+                offset);
+
+        if (styles != null && stylesPosition != -1) {
+            urlIcons += "&style=" + styles.getStyles().get(stylesPosition).getIdentifier();
+        }
+
+        Log.d(">>>", "urlIcons = " + urlIcons);
+
         final GsonRequest gsonRequest = new GsonRequest(urlIcons, Icons.class, null, new Response.Listener<Icons>() {
             @Override
             public void onResponse(Icons icons) {
-                fillIcons(icons);
+                fillIcons(icons , firstPage);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -204,6 +251,17 @@ public class MainActivity extends ActionBarActivity
         requestQueue.add(gsonRequest);
     }
 
+
+    /**
+     *
+     * More Icon download to grid
+     *
+     */
+    public void onLazyLoadMore() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String query = prefs.getString("query", "facebook");
+        onQueryIcons(query, false);
+    }
 
 
     public void onClickIcon(Icon icon) {

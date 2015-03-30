@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,13 +34,8 @@ public class PlaceholderFragment extends ListFragment {
     private IconSetsListAdapter mAdapter;
     private AbsListView mListView;
 
-    private int section;
-    private Iconsets iconsets;
-
     private EditText queryText;
 
-    private static final String urlIconsTmpl = "https://api.iconfinder.com"
-            + "/v2/icons/search?query=%s&minimum_size=%d&maximum_size=%d&count=100";
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -71,8 +65,8 @@ public class PlaceholderFragment extends ListFragment {
         queryText.setText(query);
 
         Bundle b = getArguments();
-        section = b.getInt(ARG_SECTION_NUMBER);
-        iconsets = b.getParcelable(ARG_ICON_SETS);
+        final int section = b.getInt(ARG_SECTION_NUMBER);
+        final Iconsets iconsets = b.getParcelable(ARG_ICON_SETS);
 
         Button btnSearch = (Button) rootView.findViewById(R.id.btnSearh);
         btnSearch.setOnClickListener(new View.OnClickListener() {
@@ -85,20 +79,7 @@ public class PlaceholderFragment extends ListFragment {
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("query", query).commit();
 
-                    String urlIcons;
-                    int minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
-                    int maximum_size = Integer.valueOf(prefs.getString("maximum_size_list", "512"));
-
-                    urlIcons = String.format(urlIconsTmpl, queryText.getText(),
-                            minimum_size,
-                            maximum_size);
-
-                    if (iconsets != null) {
-                        urlIcons += "&style=" + iconsets.getIconsets().get(section).getStyles().get(0).getIdentifier();
-                    }
-
-                    Log.d(">>>", "urlIcons = " + urlIcons);
-                    ((MainActivity) getActivity()).onQueryIcons(urlIcons);
+                    ((MainActivity) getActivity()).onQueryIcons(query, true);
                 }
             }
         });
