@@ -2,7 +2,7 @@
 
 Iconfinder Android client demo App
 
-Feed see on iconfinder.com https://developer.iconfinder.com/api/2.0/index.html
+Api iconfinder.com https://developer.iconfinder.com/api/2.0/index.html
 
 This just demo how to parse feed with Volley and use Fragments
 
@@ -59,4 +59,5 @@ Then simple replace your Fragment through FragmentManager
 ![](https://github.com/app-z/Iconfinder/blob/master/screen1.png)
 ![](https://github.com/app-z/Iconfinder/blob/master/screen2.png)
 ![](https://github.com/app-z/Iconfinder/blob/master/screen3.png)
+![](https://github.com/app-z/Iconfinder/blob/master/screen4.png)
 
