@@ -3,6 +3,7 @@ package net.appz.iconfinder;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -56,18 +57,19 @@ public class MainActivity extends ActionBarActivity
     private int count = 20;
     private int offset = 0;
 
+    private int stylesPosition = -1;
+
+
     private Styles styles;
-    private Icons icons;
+//    private Icons icons;
 
     // Request for Json Download
-    private RequestQueue requestQueue;
+    private RequestQueue requestQueue = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        requestQueue = Volley.newRequestQueue(this);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -78,33 +80,43 @@ public class MainActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-        //Log.e(TAG, "currentFragment = " + currentFragment);
-        if(currentFragment == null) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
-                    .commit();
+        if(!AppUtils.isNetworkAvailable(this)){
+            AppUtils.showDialog(this, "Internet error", "Check internet connection!", true);
+        }else {
+
+            if (requestQueue == null)
+                requestQueue = Volley.newRequestQueue(this);
+
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+            Log.e(TAG, "onCreate : currentFragment = " + currentFragment);
+            if (currentFragment == null) {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
+                        .commit();
+            }
+
+            urlStyles += "?_=" + new Random().nextInt();
+            Log.d(TAG, "Request => " + urlStyles);
+
+
+            requestQueue.cancelAll(this);
+            final GsonRequest gsonRequest = new GsonRequest(urlStyles, Styles.class, null, new Response.Listener<Styles>() {
+                @Override
+                public void onResponse(Styles styles) {
+                    fillStyles(styles);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    if (volleyError != null)
+                        Log.e(TAG, "volleyError: " + volleyError.getMessage());
+                }
+            });
+            gsonRequest.setTag("Styles");
+            requestQueue.add(gsonRequest);
         }
-
-        urlStyles += "?_=" + new Random().nextInt();
-        Log.d(TAG, "Request => " + urlStyles);
-
-
-        final GsonRequest gsonRequest = new GsonRequest(urlStyles, Styles.class, null, new Response.Listener<Styles>() {
-            @Override
-            public void onResponse(Styles styles) {
-                fillStyles(styles);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                if(volleyError != null)
-                    Log.e(TAG, volleyError.getMessage());
-            }
-        });
-        gsonRequest.setTag("Styles");
-        requestQueue.add(gsonRequest);
 
     }
 
@@ -116,9 +128,7 @@ public class MainActivity extends ActionBarActivity
             stileTitles[i++] = style.getName();
         }
 
-        // Set the adapter for the list view
-        //mNavigationDrawerFragment.getDrawerListView().setAdapter(new ArrayAdapter<String>(this,
-        //        android.R.layout.simple_list_item_activated_1, stileTitles));
+        // Set the adapter for the list view left menu
         mNavigationDrawerFragment.getDrawerListView().setAdapter(new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_list_item_activated_1,
@@ -127,7 +137,6 @@ public class MainActivity extends ActionBarActivity
 
     }
 
-    int stylesPosition = -1;
 
     private void fillIconSets(Iconsets iconsets, final int position) {
         stylesPosition = position;
@@ -158,7 +167,7 @@ public class MainActivity extends ActionBarActivity
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
                     if (volleyError != null)
-                        Log.e(TAG, volleyError.getMessage());
+                        Log.e(TAG, "volleyError: " + volleyError.getMessage());
                 }
             });
             gsonRequest.setTag("Iconsets");
@@ -193,20 +202,17 @@ public class MainActivity extends ActionBarActivity
     private void fillIcons(Icons icons, boolean firstPage) {
         Log.d(">>>", "Icons size = " + icons.getIcons().size());
 
-        if(!firstPage){
-            this.icons.getIcons().addAll(icons.getIcons());
-        }else{
-            this.icons = icons;
-        }
-
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+        Log.e(TAG, "fillIcons : currentFragment = " + currentFragment);
+
         if(currentFragment != null && currentFragment instanceof IconsGridFragment) {
-            ((IconsGridFragment)currentFragment).setAdapter(this.icons);
+            ((IconsGridFragment)currentFragment).addIcons(icons);
         } else {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, IconsGridFragment.newInstance(this.icons))
-                    .commit();
+                fragmentManager.beginTransaction()
+                    .replace(R.id.container, IconsGridFragment.newInstance(icons))
+                    .commitAllowingStateLoss();
+            fragmentManager.executePendingTransactions();
         }
     }
 
@@ -244,7 +250,7 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 if (volleyError != null)
-                    Log.e(TAG, "Error:" + volleyError.getMessage());
+                    Log.e(TAG, "volleyError: " + volleyError.getMessage());
             }
         });
         gsonRequest.setTag("Icons");
@@ -265,7 +271,7 @@ public class MainActivity extends ActionBarActivity
 
 
     public void onClickIcon(Icon icon) {
-
+        Log.d(">>>", "Icons id = " + icon.getIconId());
     }
 
     @Override
@@ -274,6 +280,7 @@ public class MainActivity extends ActionBarActivity
         if (requestQueue != null) {
             requestQueue.cancelAll(this);
         }
+        //Log.d(TAG, "onStop");
     }
 
     public void restoreActionBar() {

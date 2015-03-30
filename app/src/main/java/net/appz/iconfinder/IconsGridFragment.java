@@ -9,6 +9,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import net.appz.iconfinder.Data.Icon;
 import net.appz.iconfinder.Data.Icons;
 
 /**
@@ -24,10 +25,10 @@ public class IconsGridFragment extends Fragment {
     boolean loadingMore = true;
     boolean stopLoadingData = false;
 
-    Icons icons;
+    //Icons icons;
 
-    GridView gridView;
-
+    private GridView gridView;
+    private IconsGridAdapter iconsGridAdapter;
     /**
      * Returns a new instance of this fragment
      *
@@ -44,11 +45,12 @@ public class IconsGridFragment extends Fragment {
     public IconsGridFragment() {
     }
 
-    public void setAdapter(Icons icons){
+    public void addIcons(Icons icons){
         // get listview current position - used to maintain scroll position
         int currentPosition = gridView.getFirstVisiblePosition();
 
-        gridView.setAdapter(new IconsGridAdapter(getActivity(), icons.getIcons()));
+        iconsGridAdapter.addAll(icons.getIcons());
+
         // Setting new scroll position
         gridView.setSelection(currentPosition + 1);
 
@@ -62,20 +64,20 @@ public class IconsGridFragment extends Fragment {
 
         gridView = (GridView) rootView.findViewById(R.id.gridView1);
 
+
         Bundle b = getArguments();
-        icons = b.getParcelable(ARG_ICONS);
-
-        setAdapter(icons);
-
+        Icons icons = b.getParcelable(ARG_ICONS);
+        iconsGridAdapter = new IconsGridAdapter(getActivity(), icons.getIcons());
+        gridView.setAdapter(iconsGridAdapter);
+        loadingMore = false;
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-
-                ((MainActivity) getActivity()).onClickIcon(icons.getIcons().get(position));
-
+                Icon icon = iconsGridAdapter.getItem(position);
+                ((MainActivity) getActivity()).onClickIcon(icon);
             }
         });
 

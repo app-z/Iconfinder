@@ -19,8 +19,6 @@ import android.widget.EditText;
 
 import net.appz.iconfinder.Data.Iconsets;
 
-import java.util.ArrayList;
-
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -87,9 +85,7 @@ public class PlaceholderFragment extends ListFragment {
 
 
         if(iconsets != null) {
-            ArrayList iconsetItemList = new ArrayList();
-            iconsetItemList.addAll(iconsets.getIconsets());
-            mAdapter = new IconSetsListAdapter(getActivity(), iconsetItemList);
+            mAdapter = new IconSetsListAdapter(getActivity(), iconsets.getIconsets());
 
             // Set the adapter
             mListView = (AbsListView) rootView.findViewById(android.R.id.list);
