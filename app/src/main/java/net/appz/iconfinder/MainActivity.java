@@ -92,15 +92,12 @@ public class MainActivity extends ActionBarActivity
             Log.e(TAG, "onCreate : currentFragment = " + currentFragment);
             if (currentFragment == null) {
                 fragmentManager.beginTransaction()
-                        .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
+                        .replace(R.id.container,
+                                PlaceholderFragment.newInstance(0, null),
+                                PlaceholderFragment.class.getSimpleName())
                         .commit();
             }else if ( currentFragment instanceof IconsDetailFragment ){
-                List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-                for (Fragment fragment : allFragments) {
-                    if (fragment instanceof IconsGridFragment) {
-                        fragmentManager.beginTransaction().hide(fragment).commitAllowingStateLoss();
-                    }
-                }
+                hideFragmentByTag(IconsGridFragment.class.getSimpleName());
             }
 
             urlStyles += "?_=" + new Random().nextInt();
@@ -150,10 +147,12 @@ public class MainActivity extends ActionBarActivity
         actionBar.setTitle(mTitle);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        removeIconsDetailFragment();
+        removeFragmentByTag(IconsDetailFragment.class.getSimpleName());
         // update the main content by replacing fragments
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position, iconsets))
+                .replace(R.id.container,
+                        PlaceholderFragment.newInstance(position, iconsets),
+                        PlaceholderFragment.class.getSimpleName())
                 .commit();
     }
 
@@ -184,15 +183,40 @@ public class MainActivity extends ActionBarActivity
 
     /**
      *
-     * Remove IconsDetailFragment if exist
+     * Remove Fragment if exist
      */
-    void removeIconsDetailFragment(){
+    void removeFragmentByTag(String tag){
         FragmentManager fragmentManager = getSupportFragmentManager();
-        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-        for (Fragment fragment : allFragments){
-            if(fragment instanceof IconsDetailFragment){
-                fragmentManager.beginTransaction().remove(fragment).commitAllowingStateLoss();
-            }
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().remove(fragment).commit();
+            Log.e(TAG, "Remove fragment: " + fragment.getTag());
+        }
+    }
+
+    /**
+     *
+     * Hide Fragment if exist
+     */
+    void hideFragmentByTag(String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().hide(fragment).commit();
+            Log.e(TAG, "Hide fragment: " + fragment.getTag());
+        }
+    }
+
+    /**
+     *
+     * Show Fragment if exist
+     */
+    void showFragmentByTag(String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().show(fragment).commit();
+            Log.e(TAG, "Show fragment: " + fragment.getTag());
         }
     }
 
@@ -202,10 +226,12 @@ public class MainActivity extends ActionBarActivity
         mTitle = getResources().getString(R.string.app_name);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(mTitle);
-        removeIconsDetailFragment();
+        removeFragmentByTag(IconsDetailFragment.class.getSimpleName());
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
+                .replace(R.id.container,
+                        PlaceholderFragment.newInstance(0, null),
+                        PlaceholderFragment.class.getSimpleName())
                 .commit();
     }
 
@@ -228,8 +254,10 @@ public class MainActivity extends ActionBarActivity
             } else {
                 if(firstPage) {     // Don't using when Lazy download. Possible other Fragment active
                     fragmentManager.beginTransaction()
-                            .replace(R.id.container, IconsGridFragment.newInstance(icons))
-                            .commitAllowingStateLoss();
+                            .replace(R.id.container,
+                                    IconsGridFragment.newInstance(icons),
+                                    IconsGridFragment.class.getSimpleName())
+                            .commit();
                 }
             }
         }
@@ -298,18 +326,15 @@ public class MainActivity extends ActionBarActivity
         Log.d(">>>", "Icons id = " + icon.getIconId());
         FragmentManager fragmentManager = getSupportFragmentManager();
         if(!fragmentManager.isDestroyed()) {
-            List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-            for (Fragment fragment : allFragments){
-                if(fragment instanceof IconsGridFragment){
-                    fragmentManager.beginTransaction().hide(fragment).commitAllowingStateLoss();
-                }
-            }
+            hideFragmentByTag(IconsGridFragment.class.getSimpleName());
 
             Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
             if (currentFragment == null || !(currentFragment instanceof IconsDetailFragment)) {
                 fragmentManager.beginTransaction()
-                        .add(R.id.container, IconsDetailFragment.newInstance(icon))
-                        .commitAllowingStateLoss();
+                        .add(R.id.container,
+                                IconsDetailFragment.newInstance(icon),
+                                IconsDetailFragment.class.getSimpleName())
+                        .commit();
             }
         }
     }
@@ -319,17 +344,8 @@ public class MainActivity extends ActionBarActivity
      * Close Save Icon Fragment
      */
     public void onCloseSaveIcon() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-        for (Fragment fragment : allFragments){
-            if(fragment instanceof IconsDetailFragment){
-                fragmentManager.beginTransaction().remove(fragment).commitAllowingStateLoss();
-            }
-            if(fragment instanceof IconsGridFragment){
-                fragmentManager.beginTransaction().show(fragment).commitAllowingStateLoss();
-            }
-        }
+        removeFragmentByTag(IconsDetailFragment.class.getSimpleName());
+        showFragmentByTag(IconsGridFragment.class.getSimpleName());
     }
 
     @Override
