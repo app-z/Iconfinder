@@ -61,7 +61,6 @@ public class MainActivity extends ActionBarActivity
 
 
     private Styles styles;
-//    private Icons icons;
 
     // Request for Json Download
     private RequestQueue requestQueue = null;
@@ -104,12 +103,9 @@ public class MainActivity extends ActionBarActivity
                 }
             }
 
-
             urlStyles += "?_=" + new Random().nextInt();
             Log.d(TAG, "Request => " + urlStyles);
 
-
-            requestQueue.cancelAll(this);
             final GsonRequest gsonRequest = new GsonRequest(urlStyles, Styles.class, null, new Response.Listener<Styles>() {
                 @Override
                 public void onResponse(Styles styles) {
@@ -153,8 +149,9 @@ public class MainActivity extends ActionBarActivity
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(mTitle);
 
-        // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
+        removeIconsDetailFragment();
+        // update the main content by replacing fragments
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(position, iconsets))
                 .commit();
@@ -185,12 +182,27 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
+    /**
+     *
+     * Remove IconsDetailFragment if exist
+     */
+    void removeIconsDetailFragment(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+        for (Fragment fragment : allFragments){
+            if(fragment instanceof IconsDetailFragment){
+                fragmentManager.beginTransaction().remove(fragment).commitAllowingStateLoss();
+            }
+        }
+    }
+
     @Override
     public void onOptionsItemSelectedReset() {
         stylesPosition = -1;
         mTitle = getResources().getString(R.string.app_name);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(mTitle);
+        removeIconsDetailFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
@@ -210,8 +222,7 @@ public class MainActivity extends ActionBarActivity
                 + " : isDestroyed = "
                 + fragmentManager.isDestroyed());
 
-        if(!fragmentManager.isDestroyed()) {
-
+        if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
             if (currentFragment != null && currentFragment instanceof IconsGridFragment) {
                 ((IconsGridFragment) currentFragment).addIcons(icons);
             } else {
@@ -309,8 +320,6 @@ public class MainActivity extends ActionBarActivity
      */
     public void onCloseSaveIcon() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String query = prefs.getString("query", "facebook");
-
         FragmentManager fragmentManager = getSupportFragmentManager();
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
         for (Fragment fragment : allFragments){
@@ -329,6 +338,13 @@ public class MainActivity extends ActionBarActivity
         if (requestQueue != null) {
             requestQueue.cancelAll(this);
         }
+        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+        for (Fragment fragment : allFragments) {
+            if (fragment instanceof IconsGridFragment) {
+                ((IconsGridFragment)fragment).resetLoadingFlag();
+            }
+        }
+
         Log.d(TAG, "onStop");
     }
 

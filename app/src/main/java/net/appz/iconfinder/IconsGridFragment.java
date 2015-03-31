@@ -56,6 +56,10 @@ public class IconsGridFragment extends Fragment {
         loadingMore = false;
     }
 
+    public void resetLoadingFlag(){
+        loadingMore = false;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
