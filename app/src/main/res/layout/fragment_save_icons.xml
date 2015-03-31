@@ -1,20 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity$IconsSaveFragment">
 
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        />
+    <RelativeLayout
+        android:id="@+id/imgContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:indeterminate="false"
+            android:max="100"/>
+        <ImageView
+            android:id="@+id/grid_item_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerHorizontal="true"
+            />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tagLbl"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imgContainer"
+        android:gravity="right"
+        android:text="Tags:"
+        android:textSize="25sp"/>
+
+    <TextView
+        android:id="@+id/tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:layout_below="@+id/imgContainer"
+        android:layout_toRightOf="@+id/tagLbl"
+        android:textSize="25sp"/>
+
+
+    <TextView
+        android:id="@+id/categoryLbl"
+        android:layout_width="150dp"
+        android:gravity="right"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tag"
+        android:text="Categories:"
+        android:textSize="25sp"/>
+
+    <TextView
+        android:id="@+id/category"
+        android:layout_below="@+id/tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:layout_toRightOf="@+id/categoryLbl"
+        android:textSize="25sp"/>
+
+
+    <TextView
+        android:id="@+id/rasterSizesLbl"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:layout_below="@+id/category"
+        android:text="Sizes Raster:"
+        android:textSize="25sp"/>
+
+    <TextView
+        android:id="@+id/rasterSizes"
+        android:layout_below="@+id/category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:layout_toRightOf="@+id/rasterSizesLbl"
+        android:textSize="25sp"/>
+
+
+    <TextView
+        android:id="@+id/publishedAtLbl"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:layout_below="@+id/rasterSizes"
+        android:text="Published:"
+        android:textSize="25sp"/>
+
+    <TextView
+        android:id="@+id/publishedAt"
+        android:layout_below="@+id/rasterSizes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:layout_toRightOf="@+id/publishedAtLbl"
+        android:textSize="25sp"/>
+
 
     <Button
         android:id="@+id/btnSave"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:paddingTop="40dp"
-        />
+        android:padding="10dp"
+        android:text="ok"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
-</LinearLayout>
+</RelativeLayout>

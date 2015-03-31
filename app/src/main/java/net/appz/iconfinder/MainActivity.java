@@ -186,15 +186,6 @@ public class MainActivity extends ActionBarActivity
                 .commit();
     }
 
-    public void onSectionAttached(int position) {
-        /*
-        if(styles != null && mTitle != null) {
-            mTitle = styles.getStyles().get(position).getName();
-            ActionBar actionBar = getSupportActionBar();
-            actionBar.setTitle(mTitle);
-            Log.d(TAG, "Title = " + mTitle.toString());
-        }*/
-    }
 
 
 
@@ -213,17 +204,18 @@ public class MainActivity extends ActionBarActivity
             if (currentFragment != null && currentFragment instanceof IconsGridFragment) {
                 ((IconsGridFragment) currentFragment).addIcons(icons);
             } else {
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, IconsGridFragment.newInstance(icons))
-                        .commitAllowingStateLoss();
+                if(firstPage) {     // Don't using when Lazy download. Possible other Fragment active
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.container, IconsGridFragment.newInstance(icons))
+                            .commitAllowingStateLoss();
+                }
             }
         }
     }
 
-    /*
-
-        Get Icons by query and Stile
-
+    /**
+     *
+     *  Get Icons by query and Stile
      */
     public void onQueryIcons(String query, final boolean firstPage) {
 
@@ -274,8 +266,33 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    /**
+     *
+     * Click on grid icons item
+     * @param icon
+     */
     public void onClickIcon(Icon icon) {
         Log.d(">>>", "Icons id = " + icon.getIconId());
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if(!fragmentManager.isDestroyed()) {
+            Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+            if (currentFragment == null || !(currentFragment instanceof IconsSaveFragment)) {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, IconsSaveFragment.newInstance(icon))
+                        .commitAllowingStateLoss();
+            }
+        }
+    }
+
+    /**
+     *
+     * Close Save Icon Fragment
+     */
+    public void onCloseSaveIcon() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String query = prefs.getString("query", "facebook");
+        onQueryIcons(query, true);
+
     }
 
     @Override
@@ -285,6 +302,16 @@ public class MainActivity extends ActionBarActivity
             requestQueue.cancelAll(this);
         }
         Log.d(TAG, "onStop");
+    }
+
+    public void onSectionAttached(int position) {
+        /*
+        if(styles != null && mTitle != null) {
+            mTitle = styles.getStyles().get(position).getName();
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setTitle(mTitle);
+            Log.d(TAG, "Title = " + mTitle.toString());
+        }*/
     }
 
     public void restoreActionBar() {
