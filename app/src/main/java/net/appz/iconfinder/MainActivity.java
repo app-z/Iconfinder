@@ -25,6 +25,7 @@ import net.appz.iconfinder.Data.Iconsets;
 import net.appz.iconfinder.Data.Style;
 import net.appz.iconfinder.Data.Styles;
 
+import java.util.List;
 import java.util.Random;
 
 
@@ -94,7 +95,15 @@ public class MainActivity extends ActionBarActivity
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, PlaceholderFragment.newInstance(0, null))
                         .commit();
+            }else if ( currentFragment instanceof IconsDetailFragment ){
+                List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+                for (Fragment fragment : allFragments) {
+                    if (fragment instanceof IconsGridFragment) {
+                        fragmentManager.beginTransaction().hide(fragment).commitAllowingStateLoss();
+                    }
+                }
             }
+
 
             urlStyles += "?_=" + new Random().nextInt();
             Log.d(TAG, "Request => " + urlStyles);
@@ -111,6 +120,7 @@ public class MainActivity extends ActionBarActivity
                 public void onErrorResponse(VolleyError volleyError) {
                     if (volleyError != null)
                         Log.e(TAG, "volleyError: " + volleyError.getMessage());
+                    AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
                 }
             });
             gsonRequest.setTag("Styles");
@@ -167,6 +177,7 @@ public class MainActivity extends ActionBarActivity
                 public void onErrorResponse(VolleyError volleyError) {
                     if (volleyError != null)
                         Log.e(TAG, "volleyError: " + volleyError.getMessage());
+                    AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
                 }
             });
             gsonRequest.setTag("Iconsets");
@@ -247,6 +258,7 @@ public class MainActivity extends ActionBarActivity
             public void onErrorResponse(VolleyError volleyError) {
                 if (volleyError != null)
                     Log.e(TAG, "volleyError: " + volleyError.getMessage());
+                AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
             }
         });
         gsonRequest.setTag("Icons");
@@ -275,10 +287,17 @@ public class MainActivity extends ActionBarActivity
         Log.d(">>>", "Icons id = " + icon.getIconId());
         FragmentManager fragmentManager = getSupportFragmentManager();
         if(!fragmentManager.isDestroyed()) {
+            List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+            for (Fragment fragment : allFragments){
+                if(fragment instanceof IconsGridFragment){
+                    fragmentManager.beginTransaction().hide(fragment).commitAllowingStateLoss();
+                }
+            }
+
             Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-            if (currentFragment == null || !(currentFragment instanceof IconsSaveFragment)) {
+            if (currentFragment == null || !(currentFragment instanceof IconsDetailFragment)) {
                 fragmentManager.beginTransaction()
-                        .replace(R.id.container, IconsSaveFragment.newInstance(icon))
+                        .add(R.id.container, IconsDetailFragment.newInstance(icon))
                         .commitAllowingStateLoss();
             }
         }
@@ -291,8 +310,17 @@ public class MainActivity extends ActionBarActivity
     public void onCloseSaveIcon() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String query = prefs.getString("query", "facebook");
-        onQueryIcons(query, true);
 
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+        for (Fragment fragment : allFragments){
+            if(fragment instanceof IconsDetailFragment){
+                fragmentManager.beginTransaction().remove(fragment).commitAllowingStateLoss();
+            }
+            if(fragment instanceof IconsGridFragment){
+                fragmentManager.beginTransaction().show(fragment).commitAllowingStateLoss();
+            }
+        }
     }
 
     @Override

@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +25,7 @@ import java.util.List;
 /**
  * Created by App-z.net on 30.03.15.
  */
-public class IconsSaveFragment extends Fragment {
+public class IconsDetailFragment extends Fragment {
 
     private static final String ARG_ICON = "icon";
 
@@ -34,8 +33,8 @@ public class IconsSaveFragment extends Fragment {
      * Returns a new instance of this fragment
      *
      */
-    public static IconsSaveFragment newInstance(Icon icon) {
-        IconsSaveFragment fragment = new IconsSaveFragment();
+    public static IconsDetailFragment newInstance(Icon icon) {
+        IconsDetailFragment fragment = new IconsDetailFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_ICON, icon);
 
@@ -43,14 +42,14 @@ public class IconsSaveFragment extends Fragment {
         return fragment;
     }
 
-    public IconsSaveFragment() {
+    public IconsDetailFragment() {
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_save_icons, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_detail_icons, container, false);
 
         Bundle b = getArguments();
         Icon icon = b.getParcelable(ARG_ICON);
@@ -78,9 +77,7 @@ public class IconsSaveFragment extends Fragment {
         Button btnSearch = (Button) rootView.findViewById(R.id.btnSave);
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d(">>>", "Icons = ");
                 ((MainActivity) getActivity()).onCloseSaveIcon();
-
             }
 
         });
