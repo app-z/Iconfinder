@@ -7,6 +7,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.util.Log;
 
 public class AppUtils {
 
@@ -99,5 +102,45 @@ public class AppUtils {
         alertDialog.show();
 
     }
+
+
+
+
+    /**
+     *
+     * Remove Fragment if exist
+     */
+    void removeFragmentByTag(FragmentManager fragmentManager, String tag){
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().remove(fragment).commit();
+            Log.e(TAG, "Remove fragment: " + fragment.getTag());
+        }
+    }
+
+    /**
+     *
+     * Hide Fragment if exist
+     */
+    void hideFragmentByTag(FragmentManager fragmentManager, String tag){
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().hide(fragment).commit();
+            Log.e(TAG, "Hide fragment: " + fragment.getTag());
+        }
+    }
+
+    /**
+     *
+     * Show Fragment if exist
+     */
+    void showFragmentByTag(FragmentManager fragmentManager, String tag){
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().show(fragment).commit();
+            Log.e(TAG, "Show fragment: " + fragment.getTag());
+        }
+    }
+
 
 }

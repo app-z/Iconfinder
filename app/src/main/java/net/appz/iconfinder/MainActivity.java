@@ -61,7 +61,7 @@ public class MainActivity extends ActionBarActivity
             + "/v2/icons/search?query=%s&minimum_size=%d&maximum_size=%d&count=%d&offset=%d";
 
     private int count = 20;
-    private int offset = 0;
+    private static int offset = 0;
 
     private int stylesPosition = -1;
 
@@ -253,8 +253,8 @@ public class MainActivity extends ActionBarActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
 
-        //if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
         // Resolved After Loader implementation
+        //if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
 
         if (currentFragment != null && currentFragment instanceof IconsGridFragment) {
             ((IconsGridFragment) currentFragment).addIcons(icons);
@@ -415,43 +415,5 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    /**
-     *
-     * Remove Fragment if exist
-     */
-    void removeFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().remove(fragment).commit();
-            Log.e(TAG, "Remove fragment: " + fragment.getTag());
-        }
-    }
-
-    /**
-     *
-     * Hide Fragment if exist
-     */
-    void hideFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().hide(fragment).commit();
-            Log.e(TAG, "Hide fragment: " + fragment.getTag());
-        }
-    }
-
-    /**
-     *
-     * Show Fragment if exist
-     */
-    void showFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().show(fragment).commit();
-            Log.e(TAG, "Show fragment: " + fragment.getTag());
-        }
-    }
 
 }
