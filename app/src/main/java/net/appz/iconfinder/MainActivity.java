@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -96,8 +97,6 @@ public class MainActivity extends ActionBarActivity
                                 PlaceholderFragment.newInstance(0, null),
                                 PlaceholderFragment.class.getSimpleName())
                         .commit();
-            }else if ( currentFragment instanceof IconsDetailFragment ){
-                hideFragmentByTag(IconsGridFragment.class.getSimpleName());
             }
 
             urlStyles += "?_=" + new Random().nextInt();
@@ -181,44 +180,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    /**
-     *
-     * Remove Fragment if exist
-     */
-    void removeFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().remove(fragment).commit();
-            Log.e(TAG, "Remove fragment: " + fragment.getTag());
-        }
-    }
-
-    /**
-     *
-     * Hide Fragment if exist
-     */
-    void hideFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().hide(fragment).commit();
-            Log.e(TAG, "Hide fragment: " + fragment.getTag());
-        }
-    }
-
-    /**
-     *
-     * Show Fragment if exist
-     */
-    void showFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().show(fragment).commit();
-            Log.e(TAG, "Show fragment: " + fragment.getTag());
-        }
-    }
 
     @Override
     public void onOptionsItemSelectedReset() {
@@ -253,11 +214,13 @@ public class MainActivity extends ActionBarActivity
                 ((IconsGridFragment) currentFragment).addIcons(icons);
             } else {
                 if(firstPage) {     // Don't using when Lazy download. Possible other Fragment active
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.container,
-                                    IconsGridFragment.newInstance(icons),
-                                    IconsGridFragment.class.getSimpleName())
-                            .commit();
+                    Fragment iconsGridFragment = IconsGridFragment.newInstance(icons);
+                    // Add the fragment to the activity, pushing this transaction on to the back stack.
+                    FragmentTransaction ft = fragmentManager.beginTransaction();
+                    ft.replace(R.id.container, iconsGridFragment, IconsDetailFragment.class.getSimpleName());
+                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    ft.addToBackStack(null);
+                    ft.commit();
                 }
             }
         }
@@ -324,19 +287,15 @@ public class MainActivity extends ActionBarActivity
      */
     public void onClickIcon(Icon icon) {
         Log.d(">>>", "Icons id = " + icon.getIconId());
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        if(!fragmentManager.isDestroyed()) {
-            hideFragmentByTag(IconsGridFragment.class.getSimpleName());
 
-            Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-            if (currentFragment == null || !(currentFragment instanceof IconsDetailFragment)) {
-                fragmentManager.beginTransaction()
-                        .add(R.id.container,
-                                IconsDetailFragment.newInstance(icon),
-                                IconsDetailFragment.class.getSimpleName())
-                        .commit();
-            }
-        }
+        Fragment iconsDetailFragment = IconsDetailFragment.newInstance(icon);
+        // Add the fragment to the activity, pushing this transaction on to the back stack.
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.replace(R.id.container, iconsDetailFragment, IconsDetailFragment.class.getSimpleName());
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.addToBackStack(null);
+        ft.commit();
     }
 
     /**
@@ -344,8 +303,8 @@ public class MainActivity extends ActionBarActivity
      * Close Save Icon Fragment
      */
     public void onCloseSaveIcon() {
-        removeFragmentByTag(IconsDetailFragment.class.getSimpleName());
-        showFragmentByTag(IconsGridFragment.class.getSimpleName());
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.popBackStack();
     }
 
     @Override
@@ -363,6 +322,47 @@ public class MainActivity extends ActionBarActivity
 
         Log.d(TAG, "onStop");
     }
+
+
+    /**
+     *
+     * Remove Fragment if exist
+     */
+    void removeFragmentByTag(String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().remove(fragment).commit();
+            Log.e(TAG, "Remove fragment: " + fragment.getTag());
+        }
+    }
+
+    /**
+     *
+     * Hide Fragment if exist
+     */
+    void hideFragmentByTag(String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().hide(fragment).commit();
+            Log.e(TAG, "Hide fragment: " + fragment.getTag());
+        }
+    }
+
+    /**
+     *
+     * Show Fragment if exist
+     */
+    void showFragmentByTag(String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().show(fragment).commit();
+            Log.e(TAG, "Show fragment: " + fragment.getTag());
+        }
+    }
+
 
     public void onSectionAttached(int position) {
         /*
