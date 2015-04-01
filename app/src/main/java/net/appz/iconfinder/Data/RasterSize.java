@@ -16,14 +16,14 @@ public class RasterSize implements Parcelable {
 
     @SerializedName("size_width")
     @Expose
-    private Integer sizeWidth;
+    private int sizeWidth;
     @SerializedName("size_height")
     @Expose
-    private Integer sizeHeight;
+    private int sizeHeight;
     @Expose
     private List<Format> formats; // = new ArrayList<Format>();
     @Expose
-    private Integer size;
+    private int size;
 
     /**
      *
@@ -39,7 +39,7 @@ public class RasterSize implements Parcelable {
      * @param sizeWidth
      * The size_width
      */
-    public void setSizeWidth(Integer sizeWidth) {
+    public void setSizeWidth(int sizeWidth) {
         this.sizeWidth = sizeWidth;
     }
 
@@ -57,7 +57,7 @@ public class RasterSize implements Parcelable {
      * @param sizeHeight
      * The size_height
      */
-    public void setSizeHeight(Integer sizeHeight) {
+    public void setSizeHeight(int sizeHeight) {
         this.sizeHeight = sizeHeight;
     }
 
@@ -98,16 +98,17 @@ public class RasterSize implements Parcelable {
     }
 
 
+
     protected RasterSize(Parcel in) {
-        sizeWidth = in.readByte() == 0x00 ? null : in.readInt();
-        sizeHeight = in.readByte() == 0x00 ? null : in.readInt();
+        sizeWidth = in.readInt();
+        sizeHeight = in.readInt();
         if (in.readByte() == 0x01) {
             formats = new ArrayList<Format>();
             in.readList(formats, Format.class.getClassLoader());
         } else {
             formats = null;
         }
-        size = in.readByte() == 0x00 ? null : in.readInt();
+        size = in.readInt();
     }
 
     @Override
@@ -117,30 +118,15 @@ public class RasterSize implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        if (sizeWidth == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeInt(sizeWidth);
-        }
-        if (sizeHeight == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeInt(sizeHeight);
-        }
+        dest.writeInt(sizeWidth);
+        dest.writeInt(sizeHeight);
         if (formats == null) {
             dest.writeByte((byte) (0x00));
         } else {
             dest.writeByte((byte) (0x01));
             dest.writeList(formats);
         }
-        if (size == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeInt(size);
-        }
+        dest.writeInt(size);
     }
 
     @SuppressWarnings("unused")

@@ -17,11 +17,8 @@ import java.util.List;
  */
 public class IconSetsListAdapter  extends ArrayAdapter {
 
-    private Context context;
-
     public IconSetsListAdapter(Context context, List items) {
         super(context, android.R.layout.simple_list_item_1, items);
-        this.context = context;
     }
 
     /**
@@ -45,7 +42,7 @@ public class IconSetsListAdapter  extends ArrayAdapter {
 
         // This block exists to inflate the settings list item conditionally based on whether
         // we want to support a grid or list view.
-        LayoutInflater mInflater = (LayoutInflater) context
+        LayoutInflater mInflater = (LayoutInflater) getContext()
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
             viewToUse = mInflater.inflate(R.layout.iconset_list_item, null);

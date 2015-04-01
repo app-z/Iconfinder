@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -18,6 +19,7 @@ import com.squareup.picasso.Picasso;
 import net.appz.iconfinder.Data.Category;
 import net.appz.iconfinder.Data.Icon;
 import net.appz.iconfinder.Data.RasterSize;
+import net.appz.iconfinder.Data.VectorSize;
 
 import java.util.Arrays;
 import java.util.List;
@@ -74,8 +76,8 @@ public class IconsDetailFragment extends Fragment {
         TextView publishedAt = (TextView)rootView.findViewById(R.id.publishedAt);
         publishedAt.setText(icon.getPublishedAt());
 
-        Button btnSearch = (Button) rootView.findViewById(R.id.btnSave);
-        btnSearch.setOnClickListener(new View.OnClickListener() {
+        Button btnClose = (Button) rootView.findViewById(R.id.btnClose);
+        btnClose.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 ((MainActivity) getActivity()).onCloseSaveIcon();
             }
@@ -107,6 +109,27 @@ public class IconsDetailFragment extends Fragment {
                     break;
                 }
             }
+        }
+
+        // List Raster sizes
+        ListView rasterSizesListView = (ListView)rootView.findViewById(R.id.rasterSizesListView);
+        IconDetailRasterAdapter iconDetailRasterAdapter = new IconDetailRasterAdapter(getActivity(), rasterSizes);
+        rasterSizesListView.setAdapter(iconDetailRasterAdapter);
+
+        // List Vector sizes
+        ListView vectorSizesListView = (ListView) rootView.findViewById(R.id.vectorSizesListView);
+
+        List<VectorSize> vectorSizes = icon.getVectorSizes();
+        if(vectorSizes != null && vectorSizes.size() > 0) {
+            String iconvectorSizes = "";
+            for (VectorSize vectorSize : icon.getVectorSizes()){
+                iconvectorSizes += "" + vectorSize.getSizeWidth() + "x" + vectorSize.getSizeHeight() + " ";
+            }
+            rasetSizes.setText(iconvectorSizes);
+            IconDetailVectorIdapter iconDetailVectorIdapter = new IconDetailVectorIdapter(getActivity(), vectorSizes);
+            vectorSizesListView.setAdapter(iconDetailVectorIdapter);
+        } else {
+            vectorSizesListView.setVisibility(View.GONE);
         }
 
         return rootView;
