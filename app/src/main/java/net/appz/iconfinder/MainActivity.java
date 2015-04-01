@@ -162,6 +162,7 @@ public class MainActivity extends ActionBarActivity
         actionBar.setTitle(mTitle);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         // update the main content by replacing fragments
         fragmentManager.beginTransaction()
                 .replace(R.id.container,
@@ -203,6 +204,7 @@ public class MainActivity extends ActionBarActivity
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(mTitle);
         FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         fragmentManager.beginTransaction()
                 .replace(R.id.container,
                         PlaceholderFragment.newInstance(0, null),
