@@ -30,6 +30,8 @@
         android:id="@android:id/list"
         android:layout_below="@+id/queryText"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"/>
+        android:layout_height="fill_parent"
+        android:listSelector="@android:color/transparent"
+        android:cacheColorHint="@android:color/transparent"/>
 
 </RelativeLayout>

@@ -61,7 +61,7 @@ public class MainActivity extends ActionBarActivity
             + "/v2/icons/search?query=%s&minimum_size=%d&maximum_size=%d&count=%d&offset=%d";
 
     private int count = 20;
-    private static int offset = 0;
+    private /* static */ int offset = 0;
 
     private int stylesPosition = -1;
 
@@ -76,6 +76,10 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState != null){
+            offset = savedInstanceState.getInt("offset");
+            stylesPosition = savedInstanceState.getInt("stylesPosition");
+        }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -124,7 +128,13 @@ public class MainActivity extends ActionBarActivity
             gsonRequest.setTag("Styles");
             requestQueue.add(gsonRequest);
         }
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt("offset", offset);
+        savedInstanceState.putInt("stylesPosition", stylesPosition);
     }
 
     private void fillStyles(Styles styles) {
@@ -211,7 +221,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onLoadFinished(Loader<Icons> loader, Icons data) {
         if(data == null ) {
-            // In Loader happen error
+            // In Loader happened error
             AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
             return;
         }
@@ -279,7 +289,6 @@ public class MainActivity extends ActionBarActivity
         int minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
         int maximum_size = Integer.valueOf(prefs.getString("maximum_size_list", "512"));
 
-        //offset = firstPage ? 0 : (offset += count);
         String urlIcons = String.format(urlIconsTmpl, query,
                 minimum_size,
                 maximum_size,
@@ -391,9 +400,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
             restoreActionBar();
             return true;
