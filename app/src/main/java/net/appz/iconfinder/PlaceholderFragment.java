@@ -77,7 +77,7 @@ public class PlaceholderFragment extends ListFragment {
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("query", query).commit();
 
-                    ((MainActivity) getActivity()).onQueryIcons(query, true);
+                    ((MainActivity) getActivity()).onQueryIcons(query);
                 }
             }
         });

@@ -3,10 +3,14 @@ package net.appz.iconfinder;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -31,7 +35,8 @@ import java.util.Random;
 
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements LoaderManager.LoaderCallbacks<Icons>,
+        NavigationDrawerFragment.NavigationDrawerCallbacks{
 
     private String TAG = "MainActivity>";
 
@@ -60,6 +65,7 @@ public class MainActivity extends ActionBarActivity
 
     private int stylesPosition = -1;
 
+    private static final int LOADER_ICONS_ID = 1;
 
     private Styles styles;
 
@@ -195,47 +201,85 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    @Override
+    public Loader<Icons> onCreateLoader(int id, Bundle args) {
+        IconsLoader iconsLoader = new IconsLoader(this, args);
+        return iconsLoader;
+    }
 
 
-    synchronized private void fillIcons(Icons icons, boolean firstPage) {
+    @Override
+    public void onLoadFinished(Loader<Icons> loader, Icons data) {
+        if(data == null ) {
+            // In Loader happen error
+            AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
+            return;
+        }
+
+        if(loader.getId() == LOADER_ICONS_ID){
+                offset += count;
+                Bundle b = new Bundle();
+                b.putParcelable("Icons", data);
+                Message msg = mHandler.obtainMessage();
+                msg.what = ICONS_HANDLER;
+                msg.setData(b);
+                mHandler.sendMessage(msg);
+        }
+    }
+
+
+    final int ICONS_HANDLER = 1;
+    final Handler mHandler = new Handler(){
+        public void handleMessage(Message msg) {
+            Bundle b;
+            if(msg.what == ICONS_HANDLER){
+                b=msg.getData();
+                Icons icons = b.getParcelable("Icons");
+                fillIcons(icons);
+            }
+            super.handleMessage(msg);
+        }
+    };
+
+    @Override
+    public void onLoaderReset(Loader<Icons> loader) {
+        offset = 0;
+    }
+
+
+    synchronized private void fillIcons(Icons icons) {
         Log.d(">>>", "Icons size = " + icons.getIcons().size());
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-        Log.e(TAG, "fillIcons : currentFragment = "
-                + currentFragment
-                + " : isDestroyed = "
-                + fragmentManager.isDestroyed());
 
-        if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
-            if (currentFragment != null && currentFragment instanceof IconsGridFragment) {
-                ((IconsGridFragment) currentFragment).addIcons(icons);
-            } else {
-                if(firstPage) {     // Don't using when Lazy download. Possible other Fragment active
-                    Fragment iconsGridFragment = IconsGridFragment.newInstance(icons);
-                    // Add the fragment to the activity, pushing this transaction on to the back stack.
-                    FragmentTransaction ft = fragmentManager.beginTransaction();
-                    ft.replace(R.id.container, iconsGridFragment, IconsDetailFragment.class.getSimpleName());
-                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    ft.addToBackStack(null);
-                    ft.commit();
-                }
-            }
+        //if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
+        // Resolved After Loader implementation
+
+        if (currentFragment != null && currentFragment instanceof IconsGridFragment) {
+            ((IconsGridFragment) currentFragment).addIcons(icons);
+        } else {
+            Fragment iconsGridFragment = IconsGridFragment.newInstance(icons);
+            // Add the fragment to the activity, pushing this transaction on to the back stack.
+            FragmentTransaction ft = fragmentManager.beginTransaction();
+            ft.replace(R.id.container, iconsGridFragment, IconsDetailFragment.class.getSimpleName());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            ft.addToBackStack(null);
+            ft.commit();
         }
     }
+
 
     /**
      *
      *  Get Icons by query and Stile
      */
-    public void onQueryIcons(String query, final boolean firstPage) {
-
+    void queryIcons(String query){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         int minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
         int maximum_size = Integer.valueOf(prefs.getString("maximum_size_list", "512"));
 
-        offset = firstPage ? 0 : (offset += count);
-
+        //offset = firstPage ? 0 : (offset += count);
         String urlIcons = String.format(urlIconsTmpl, query,
                 minimum_size,
                 maximum_size,
@@ -248,23 +292,28 @@ public class MainActivity extends ActionBarActivity
 
         Log.d(">>>", "urlIcons = " + urlIcons);
 
-        final GsonRequest gsonRequest = new GsonRequest(urlIcons, Icons.class, null, new Response.Listener<Icons>() {
-            @Override
-            public void onResponse(Icons icons) {
-                fillIcons(icons , firstPage);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                if (volleyError != null)
-                    Log.e(TAG, "volleyError: " + volleyError.getMessage());
-                AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
-            }
-        });
-        gsonRequest.setTag("Icons");
-        requestQueue.add(gsonRequest);
+        Bundle bundle = new Bundle();
+        bundle.putString(IconsLoader.ARGS_URL, urlIcons);
+        LoaderManager loaderManager = getSupportLoaderManager();
+        loaderManager.restartLoader(LOADER_ICONS_ID, bundle, MainActivity.this);
+
+//        if (loaderManager.getLoader(LOADER_ICONS_ID) == null) {
+//            loaderManager.initLoader(LOADER_ICONS_ID, bundle, this);
+//        } else {
+//            loaderManager.restartLoader(LOADER_ICONS_ID, bundle, this);
+//        }
+
     }
 
+
+    /**
+     *
+     *  On click search button
+     */
+    public void onQueryIcons(String query) {
+        offset = 0;
+        queryIcons(query);
+    }
 
     /**
      *
@@ -274,7 +323,7 @@ public class MainActivity extends ActionBarActivity
     public void onLazyLoadMore() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String query = prefs.getString("query", "facebook");
-        onQueryIcons(query, false);
+        queryIcons(query);
     }
 
 
@@ -317,7 +366,6 @@ public class MainActivity extends ActionBarActivity
                 ((IconsGridFragment)fragment).resetLoadingFlag();
             }
         }
-
         Log.d(TAG, "onStop");
     }
 
