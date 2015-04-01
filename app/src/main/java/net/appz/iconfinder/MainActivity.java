@@ -146,7 +146,6 @@ public class MainActivity extends ActionBarActivity
         actionBar.setTitle(mTitle);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        removeFragmentByTag(IconsDetailFragment.class.getSimpleName());
         // update the main content by replacing fragments
         fragmentManager.beginTransaction()
                 .replace(R.id.container,
@@ -187,7 +186,6 @@ public class MainActivity extends ActionBarActivity
         mTitle = getResources().getString(R.string.app_name);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(mTitle);
-        removeFragmentByTag(IconsDetailFragment.class.getSimpleName());
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container,
@@ -324,46 +322,6 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    /**
-     *
-     * Remove Fragment if exist
-     */
-    void removeFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().remove(fragment).commit();
-            Log.e(TAG, "Remove fragment: " + fragment.getTag());
-        }
-    }
-
-    /**
-     *
-     * Hide Fragment if exist
-     */
-    void hideFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().hide(fragment).commit();
-            Log.e(TAG, "Hide fragment: " + fragment.getTag());
-        }
-    }
-
-    /**
-     *
-     * Show Fragment if exist
-     */
-    void showFragmentByTag(String tag){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(tag);
-        if(fragment != null){
-            fragmentManager.beginTransaction().show(fragment).commit();
-            Log.e(TAG, "Show fragment: " + fragment.getTag());
-        }
-    }
-
-
     public void onSectionAttached(int position) {
         /*
         if(styles != null && mTitle != null) {
@@ -406,6 +364,46 @@ public class MainActivity extends ActionBarActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    /**
+     *
+     * Remove Fragment if exist
+     */
+    void removeFragmentByTag(String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().remove(fragment).commit();
+            Log.e(TAG, "Remove fragment: " + fragment.getTag());
+        }
+    }
+
+    /**
+     *
+     * Hide Fragment if exist
+     */
+    void hideFragmentByTag(String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().hide(fragment).commit();
+            Log.e(TAG, "Hide fragment: " + fragment.getTag());
+        }
+    }
+
+    /**
+     *
+     * Show Fragment if exist
+     */
+    void showFragmentByTag(String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
+        if(fragment != null){
+            fragmentManager.beginTransaction().show(fragment).commit();
+            Log.e(TAG, "Show fragment: " + fragment.getTag());
+        }
     }
 
 }
