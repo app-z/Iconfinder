@@ -38,6 +38,7 @@ public class MainActivity extends ActionBarActivity
         implements LoaderManager.LoaderCallbacks<Icons>,
         NavigationDrawerFragment.NavigationDrawerCallbacks{
 
+    private static final boolean DEBUG = true;
     private String TAG = "MainActivity>";
 
     /**
@@ -260,23 +261,24 @@ public class MainActivity extends ActionBarActivity
 
 
     synchronized private void fillIcons(Icons icons) {
-        Log.d(">>>", "Icons size = " + icons.getIcons().size());
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+        if (DEBUG) Log.d(">>>", "Icons size = " + icons.getIcons().size());
 
         // Resolved After Loader implementation
         //if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
 
-        if (currentFragment != null && currentFragment instanceof IconsGridFragment) {
-            ((IconsGridFragment) currentFragment).addIcons(icons);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment iconsGridFragment = fragmentManager.findFragmentByTag(IconsGridFragment.class.getSimpleName());
+        if (iconsGridFragment != null) {
+            ((IconsGridFragment) iconsGridFragment).addIcons(icons);
+            if (DEBUG) Log.d(">>>", "fillIcons : addIcons");
         } else {
-            Fragment iconsGridFragment = IconsGridFragment.newInstance(icons);
+            if (DEBUG) Log.d(">>>", "fillIcons : IconsGridFragment.newInstance");
+            iconsGridFragment = IconsGridFragment.newInstance(icons);
             // Add the fragment to the activity, pushing this transaction on to the back stack.
             FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.replace(R.id.container, iconsGridFragment, IconsDetailFragment.class.getSimpleName());
+            ft.replace(R.id.container, iconsGridFragment, IconsGridFragment.class.getSimpleName());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            ft.addToBackStack(null);
+            ft.addToBackStack(IconsGridFragment.class.getSimpleName());
             ft.commit();
         }
     }
@@ -352,7 +354,7 @@ public class MainActivity extends ActionBarActivity
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.container, iconsDetailFragment, IconsDetailFragment.class.getSimpleName());
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        ft.addToBackStack(null);
+        ft.addToBackStack(IconsDetailFragment.class.getSimpleName());
         ft.commit();
     }
 
