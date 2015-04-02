@@ -23,7 +23,6 @@ public class DataLoader extends Loader<DataHolder> {
     private static final String TAG = "DataLoader>";
 
     public static final String ARGS_URL = "url";
-    public static final String ARGS_LOADER_ID = "loaderId";
 
     private String urlFeed;
 
@@ -71,7 +70,7 @@ public class DataLoader extends Loader<DataHolder> {
     public void onForceLoad() {
         super.onForceLoad();
 
-        if (DEBUG) Log.i(TAG, "Loader onForceLoad()");
+        if ( DEBUG ) Log.d(TAG, "Loader onForceLoad() : feedUrl = " + urlFeed);
 
         if(getId() == LOADER_STYLES_ID)
             doStylesRequest();
@@ -147,5 +146,4 @@ public class DataLoader extends Loader<DataHolder> {
         });
         requestQueue.add(gsonRequest);
     }
-
 }

@@ -50,7 +50,7 @@ public class MainActivity extends ActionBarActivity
 
     // Instantiate the RequestQueue.
     //private String url = "https://api.iconfinder.com/v2/styles?count=10&after=&_=1427589491914";
-    private String urlStyles = "https://api.iconfinder.com" + "/v2/styles";
+    private String urlStylesTempl = "https://api.iconfinder.com" + "/v2/styles?_=%d";
 
     private static final String urlIconSetsTmpl = "https://api.iconfinder.com" + "/v2/styles/%s/iconsets";
 
@@ -61,9 +61,6 @@ public class MainActivity extends ActionBarActivity
     private /* static */ int offset = 0;
 
     private int stylesPosition = -1;
-
-//    private static final int LOADER_ICONS_ID = 1;
-//    private static final int LOADER_STYLES_ID = 2;
 
     private Styles styles;
 
@@ -100,9 +97,7 @@ public class MainActivity extends ActionBarActivity
                         .commit();
             }
 
-            urlStyles += "?_=" + new Random().nextInt();
-            if ( DEBUG ) Log.d(TAG, "Request => " + urlStyles);
-
+            String urlStyles = String.format(urlStylesTempl, new Random().nextInt());
             Bundle bundle = new Bundle();
             bundle.putString(DataLoader.ARGS_URL, urlStyles);
             getSupportLoaderManager().restartLoader(DataLoader.LOADER_STYLES_ID, bundle, this);
@@ -155,13 +150,11 @@ public class MainActivity extends ActionBarActivity
             actionBar.setTitle(mTitle);
 
             // Destroy current Loader if it's not finish
-            getSupportLoaderManager().destroyLoader(DataLoader.LOADER_ICONS_ID);
-            // Download Iconsets
-
+            destroyLoaders();
 
             String urlIconsets = String.format(urlIconSetsTmpl, styles.getStyles().get(position).getIdentifier());
-            if ( DEBUG ) Log.d(TAG, "urlIconsets = " + urlIconsets);
 
+            // Download Iconsets
             Bundle bundle = new Bundle();
             bundle.putString(DataLoader.ARGS_URL, urlIconsets);
             getSupportLoaderManager().restartLoader(DataLoader.LOADER_ICONSETS_ID, bundle, this);
@@ -172,8 +165,12 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onOptionsItemSelectedReset() {
         // Destroy current Loader if it's not finish
-        LoaderManager loaderManager = getSupportLoaderManager();
-        loaderManager.destroyLoader(DataLoader.LOADER_ICONS_ID);
+        destroyLoaders();
+
+        String urlStyles = String.format(urlStylesTempl, new Random().nextInt());
+        Bundle bundle = new Bundle();
+        bundle.putString(DataLoader.ARGS_URL, urlStyles);
+        getSupportLoaderManager().restartLoader(DataLoader.LOADER_STYLES_ID, bundle, this);
 
         stylesPosition = -1;
         mTitle = getResources().getString(R.string.app_name);
@@ -204,29 +201,21 @@ public class MainActivity extends ActionBarActivity
             return;
         }
 
+        Message msg = mHandler.obtainMessage();
+        Bundle b = new Bundle();
         if(loader.getId() == DataLoader.LOADER_ICONS_ID){
-                Message msg = mHandler.obtainMessage();
-                Bundle b = new Bundle();
-                offset += count;
-                b.putParcelable("Icons", data.getIcons());
-                msg.what = ICONS_HANDLER;
-                msg.setData(b);
-                mHandler.sendMessage(msg);
+            offset += count;    // Prepare for next lazy load
+            b.putParcelable("Icons", data.getIcons());
+            msg.what = ICONS_HANDLER;
         } else if(loader.getId() == DataLoader.LOADER_STYLES_ID){
-            Message msg = mHandler.obtainMessage();
-            Bundle b = new Bundle();
             b.putParcelable("Styles", data.getStyles());
             msg.what = STILES_HANDLER;
-            msg.setData(b);
-            mHandler.sendMessage(msg);
         } else if(loader.getId() == DataLoader.LOADER_ICONSETS_ID){
-            Message msg = mHandler.obtainMessage();
-            Bundle b = new Bundle();
             b.putParcelable("IconSets", data.getIconSets());
             msg.what = ICONSETS_HANDLER;
-            msg.setData(b);
-            mHandler.sendMessage(msg);
         }
+        msg.setData(b);
+        mHandler.sendMessage(msg);
 
     }
 
@@ -237,19 +226,15 @@ public class MainActivity extends ActionBarActivity
 
     final Handler mHandler = new Handler(){
         public void handleMessage(Message msg) {
+            Bundle b;
+            b=msg.getData();
             if(msg.what == ICONS_HANDLER){
-                Bundle b;
-                b=msg.getData();
                 Icons icons = b.getParcelable("Icons");
                 fillIcons(icons);
             } else if(msg.what == STILES_HANDLER){
-                Bundle b;
-                b=msg.getData();
                 Styles styles = b.getParcelable("Styles");
                 fillStyles(styles);
             } else if(msg.what == ICONSETS_HANDLER){
-                Bundle b;
-                b=msg.getData();
                 Iconsets iconSets = b.getParcelable("IconSets");
                 fillIconSets(iconSets);
             }
@@ -265,7 +250,7 @@ public class MainActivity extends ActionBarActivity
 
 
     synchronized private void fillIcons(Icons icons) {
-        if (DEBUG) Log.d(TAG, "Icons size = " + icons.getIcons().size());
+        if (DEBUG) Log.d(TAG, "Icons size = " + icons.getIcons().size() + ": Total = " + icons.getTotalCount());
 
         // Resolved After Loader implementation
         //if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
@@ -274,9 +259,7 @@ public class MainActivity extends ActionBarActivity
         Fragment iconsGridFragment = fragmentManager.findFragmentByTag(IconsGridFragment.class.getSimpleName());
         if (iconsGridFragment != null) {
             ((IconsGridFragment) iconsGridFragment).addIcons(icons);
-            if (DEBUG) Log.d(TAG, "fillIcons : addIcons");
         } else {
-            if (DEBUG) Log.d(TAG, "fillIcons : IconsGridFragment.newInstance");
             iconsGridFragment = IconsGridFragment.newInstance(icons);
             // Add the fragment to the activity, pushing this transaction on to the back stack.
             FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -312,12 +295,6 @@ public class MainActivity extends ActionBarActivity
         Bundle bundle = new Bundle();
         bundle.putString(DataLoader.ARGS_URL, urlIcons);
         getSupportLoaderManager().restartLoader(DataLoader.LOADER_ICONS_ID, bundle, this);
-
-//        if (loaderManager.getLoader(LOADER_ICONS_ID) == null) {
-//            loaderManager.initLoader(LOADER_ICONS_ID, bundle, this);
-//        } else {
-//            loaderManager.restartLoader(LOADER_ICONS_ID, bundle, this);
-//        }
 
     }
 
