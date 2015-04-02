@@ -95,9 +95,7 @@ public class MainActivity extends ActionBarActivity
             AppUtils.showDialog(this, "Internet error", "Check internet connection!", true);
         }else {
 
-            if (requestQueue == null)
-                requestQueue = Volley.newRequestQueue(this);
-
+            requestQueue = Volley.newRequestQueue(this);
 
             FragmentManager fragmentManager = getSupportFragmentManager();
             Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
@@ -176,9 +174,12 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(final int position) {
         if(styles != null ) {
+            // Destroy current Loader if not finish
+            LoaderManager loaderManager = getSupportLoaderManager();
+            loaderManager.destroyLoader(LOADER_ICONS_ID);
             // Download Iconsets
             String urlIconsets = String.format(urlIconSetsTmpl, styles.getStyles().get(position).getIdentifier());
-            Log.d(TAG, "urlIconsets = " + urlIconsets);
+            if ( DEBUG ) Log.d(TAG, "urlIconsets = " + urlIconsets);
             final GsonRequest gsonRequest = new GsonRequest(urlIconsets, Iconsets.class, null, new Response.Listener<Iconsets>() {
                 @Override
                 public void onResponse(Iconsets iconsets) {
@@ -200,6 +201,10 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onOptionsItemSelectedReset() {
+        // Destroy current Loader if not finish
+        LoaderManager loaderManager = getSupportLoaderManager();
+        loaderManager.destroyLoader(LOADER_ICONS_ID);
+
         stylesPosition = -1;
         mTitle = getResources().getString(R.string.app_name);
         ActionBar actionBar = getSupportActionBar();
@@ -278,7 +283,7 @@ public class MainActivity extends ActionBarActivity
             FragmentTransaction ft = fragmentManager.beginTransaction();
             ft.replace(R.id.container, iconsGridFragment, IconsGridFragment.class.getSimpleName());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            ft.addToBackStack(IconsGridFragment.class.getSimpleName());
+            ft.addToBackStack(null);
             ft.commit();
         }
     }
@@ -354,7 +359,7 @@ public class MainActivity extends ActionBarActivity
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.container, iconsDetailFragment, IconsDetailFragment.class.getSimpleName());
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        ft.addToBackStack(IconsDetailFragment.class.getSimpleName());
+        ft.addToBackStack(null);
         ft.commit();
     }
 
