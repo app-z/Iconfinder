@@ -174,7 +174,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(final int position) {
         if(styles != null ) {
-            // Destroy current Loader if not finish
+            // Destroy current Loader if it's not finish
             LoaderManager loaderManager = getSupportLoaderManager();
             loaderManager.destroyLoader(LOADER_ICONS_ID);
             // Download Iconsets
@@ -201,7 +201,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onOptionsItemSelectedReset() {
-        // Destroy current Loader if not finish
+        // Destroy current Loader if it's not finish
         LoaderManager loaderManager = getSupportLoaderManager();
         loaderManager.destroyLoader(LOADER_ICONS_ID);
 

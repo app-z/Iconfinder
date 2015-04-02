@@ -119,14 +119,15 @@ public class IconsDetailFragment extends Fragment {
         // List Vector sizes
         ListView vectorSizesListView = (ListView) rootView.findViewById(R.id.vectorSizesListView);
 
-        List<VectorSize> vectorSizes = icon.getVectorSizes();
-        if(vectorSizes != null && vectorSizes.size() > 0) {
+        List<VectorSize> vectorSizesList = icon.getVectorSizes();
+        if(vectorSizesList != null && vectorSizesList.size() > 0) {
             String iconvectorSizes = "";
             for (VectorSize vectorSize : icon.getVectorSizes()){
                 iconvectorSizes += "" + vectorSize.getSizeWidth() + "x" + vectorSize.getSizeHeight() + " ";
             }
-            rasetSizes.setText(iconvectorSizes);
-            IconDetailVectorIdapter iconDetailVectorIdapter = new IconDetailVectorIdapter(getActivity(), vectorSizes);
+            TextView vectorSizes = (TextView)rootView.findViewById(R.id.vectorSizes);
+            vectorSizes.setText(iconvectorSizes);
+            IconDetailVectorIdapter iconDetailVectorIdapter = new IconDetailVectorIdapter(getActivity(), vectorSizesList);
             vectorSizesListView.setAdapter(iconDetailVectorIdapter);
         } else {
             vectorSizesListView.setVisibility(View.GONE);
