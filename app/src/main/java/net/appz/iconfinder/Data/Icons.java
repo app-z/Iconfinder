@@ -16,7 +16,7 @@ public class Icons implements Parcelable {
 
     @SerializedName("total_count")
     @Expose
-    private Integer totalCount;
+    private int totalCount;
     @Expose
     private List<Icon> icons; // = new ArrayList<Icon>();
 
@@ -25,7 +25,7 @@ public class Icons implements Parcelable {
      * @return
      * The totalCount
      */
-    public Integer getTotalCount() {
+    public int getTotalCount() {
         return totalCount;
     }
 
@@ -34,7 +34,7 @@ public class Icons implements Parcelable {
      * @param totalCount
      * The total_count
      */
-    public void setTotalCount(Integer totalCount) {
+    public void setTotalCount(int totalCount) {
         this.totalCount = totalCount;
     }
 
@@ -57,8 +57,9 @@ public class Icons implements Parcelable {
     }
 
 
+
     protected Icons(Parcel in) {
-        totalCount = in.readByte() == 0x00 ? null : in.readInt();
+        totalCount = in.readInt();
         if (in.readByte() == 0x01) {
             icons = new ArrayList<Icon>();
             in.readList(icons, Icon.class.getClassLoader());
@@ -74,12 +75,7 @@ public class Icons implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        if (totalCount == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeInt(totalCount);
-        }
+        dest.writeInt(totalCount);
         if (icons == null) {
             dest.writeByte((byte) (0x00));
         } else {

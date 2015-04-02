@@ -90,9 +90,9 @@ public class IconsDetailFragment extends Fragment {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         int minimum_size = Integer.valueOf(prefs.getString("minimum_size_list", "16"));
 
-        List<RasterSize> rasterSizes = icon.getRasterSizes();
-        if(rasterSizes != null ){
-            for (RasterSize rasterSize : rasterSizes) {
+        List<RasterSize> rasterSizesList = icon.getRasterSizes();
+        if(rasterSizesList != null ){
+            for (RasterSize rasterSize : rasterSizesList) {
                 if(rasterSize.getSize() >= minimum_size){
                     String imgUrl = rasterSize.getFormats().get(0).getPreviewUrl();
                     Picasso.with(getActivity()).load(imgUrl).into(imgView, new Callback() {
@@ -113,7 +113,7 @@ public class IconsDetailFragment extends Fragment {
 
         // List Raster sizes
         ListView rasterSizesListView = (ListView)rootView.findViewById(R.id.rasterSizesListView);
-        IconDetailRasterAdapter iconDetailRasterAdapter = new IconDetailRasterAdapter(getActivity(), rasterSizes);
+        IconDetailRasterAdapter iconDetailRasterAdapter = new IconDetailRasterAdapter(getActivity(), rasterSizesList);
         rasterSizesListView.setAdapter(iconDetailRasterAdapter);
 
         // List Vector sizes

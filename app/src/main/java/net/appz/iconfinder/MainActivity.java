@@ -19,11 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-
+import net.appz.iconfinder.Data.DataHolder;
 import net.appz.iconfinder.Data.Icon;
 import net.appz.iconfinder.Data.Icons;
 import net.appz.iconfinder.Data.Iconsets;
@@ -35,7 +31,7 @@ import java.util.Random;
 
 
 public class MainActivity extends ActionBarActivity
-        implements LoaderManager.LoaderCallbacks<Icons>,
+        implements LoaderManager.LoaderCallbacks<DataHolder>,
         NavigationDrawerFragment.NavigationDrawerCallbacks{
 
     private static final boolean DEBUG = true;
@@ -66,12 +62,10 @@ public class MainActivity extends ActionBarActivity
 
     private int stylesPosition = -1;
 
-    private static final int LOADER_ICONS_ID = 1;
+//    private static final int LOADER_ICONS_ID = 1;
+//    private static final int LOADER_STYLES_ID = 2;
 
     private Styles styles;
-
-    // Request for Json Download
-    private RequestQueue requestQueue = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,11 +89,9 @@ public class MainActivity extends ActionBarActivity
             AppUtils.showDialog(this, "Internet error", "Check internet connection!", true);
         }else {
 
-            requestQueue = Volley.newRequestQueue(this);
-
             FragmentManager fragmentManager = getSupportFragmentManager();
             Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-            Log.e(TAG, "onCreate : currentFragment = " + currentFragment);
+            if ( DEBUG ) Log.d(TAG, "onCreate : currentFragment = " + currentFragment);
             if (currentFragment == null) {
                 fragmentManager.beginTransaction()
                         .replace(R.id.container,
@@ -109,23 +101,11 @@ public class MainActivity extends ActionBarActivity
             }
 
             urlStyles += "?_=" + new Random().nextInt();
-            Log.d(TAG, "Request => " + urlStyles);
+            if ( DEBUG ) Log.d(TAG, "Request => " + urlStyles);
 
-            final GsonRequest gsonRequest = new GsonRequest(urlStyles, Styles.class, null, new Response.Listener<Styles>() {
-                @Override
-                public void onResponse(Styles styles) {
-                    fillStyles(styles);
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    if (volleyError != null)
-                        Log.e(TAG, "volleyError: " + volleyError.getMessage());
-                    AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
-                }
-            });
-            gsonRequest.setTag("Styles");
-            requestQueue.add(gsonRequest);
+            Bundle bundle = new Bundle();
+            bundle.putString(DataLoader.ARGS_URL, urlStyles);
+            getSupportLoaderManager().restartLoader(DataLoader.LOADER_STYLES_ID, bundle, this);
         }
     }
 
@@ -154,18 +134,13 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    private void fillIconSets(Iconsets iconsets, final int position) {
-        stylesPosition = position;
-        mTitle = styles.getStyles().get(position).getName();
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(mTitle);
-
+    private void fillIconSets(Iconsets iconsets) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         // update the main content by replacing fragments
         fragmentManager.beginTransaction()
                 .replace(R.id.container,
-                        PlaceholderFragment.newInstance(position, iconsets),
+                        PlaceholderFragment.newInstance(stylesPosition, iconsets),
                         PlaceholderFragment.class.getSimpleName())
                 .commit();
     }
@@ -174,27 +149,22 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(final int position) {
         if(styles != null ) {
+            stylesPosition = position;
+            mTitle = styles.getStyles().get(position).getName();
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setTitle(mTitle);
+
             // Destroy current Loader if it's not finish
-            LoaderManager loaderManager = getSupportLoaderManager();
-            loaderManager.destroyLoader(LOADER_ICONS_ID);
+            getSupportLoaderManager().destroyLoader(DataLoader.LOADER_ICONS_ID);
             // Download Iconsets
+
+
             String urlIconsets = String.format(urlIconSetsTmpl, styles.getStyles().get(position).getIdentifier());
             if ( DEBUG ) Log.d(TAG, "urlIconsets = " + urlIconsets);
-            final GsonRequest gsonRequest = new GsonRequest(urlIconsets, Iconsets.class, null, new Response.Listener<Iconsets>() {
-                @Override
-                public void onResponse(Iconsets iconsets) {
-                    fillIconSets(iconsets, position);
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    if (volleyError != null)
-                        Log.e(TAG, "volleyError: " + volleyError.getMessage());
-                    AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
-                }
-            });
-            gsonRequest.setTag("Iconsets");
-            requestQueue.add(gsonRequest);
+
+            Bundle bundle = new Bundle();
+            bundle.putString(DataLoader.ARGS_URL, urlIconsets);
+            getSupportLoaderManager().restartLoader(DataLoader.LOADER_ICONSETS_ID, bundle, this);
         }
     }
 
@@ -203,7 +173,7 @@ public class MainActivity extends ActionBarActivity
     public void onOptionsItemSelectedReset() {
         // Destroy current Loader if it's not finish
         LoaderManager loaderManager = getSupportLoaderManager();
-        loaderManager.destroyLoader(LOADER_ICONS_ID);
+        loaderManager.destroyLoader(DataLoader.LOADER_ICONS_ID);
 
         stylesPosition = -1;
         mTitle = getResources().getString(R.string.app_name);
@@ -220,53 +190,82 @@ public class MainActivity extends ActionBarActivity
 
 
     @Override
-    public Loader<Icons> onCreateLoader(int id, Bundle args) {
-        IconsLoader iconsLoader = new IconsLoader(this, args);
-        return iconsLoader;
+    public Loader<DataHolder> onCreateLoader(int id, Bundle args) {
+        DataLoader dataLoader = new DataLoader(this, args);
+        return dataLoader;
     }
 
 
     @Override
-    public void onLoadFinished(Loader<Icons> loader, Icons data) {
+    public void onLoadFinished(Loader<DataHolder> loader, DataHolder data) {
         if(data == null ) {
             // In Loader happened error
             AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
             return;
         }
 
-        if(loader.getId() == LOADER_ICONS_ID){
-                offset += count;
-                Bundle b = new Bundle();
-                b.putParcelable("Icons", data);
+        if(loader.getId() == DataLoader.LOADER_ICONS_ID){
                 Message msg = mHandler.obtainMessage();
+                Bundle b = new Bundle();
+                offset += count;
+                b.putParcelable("Icons", data.getIcons());
                 msg.what = ICONS_HANDLER;
                 msg.setData(b);
                 mHandler.sendMessage(msg);
+        } else if(loader.getId() == DataLoader.LOADER_STYLES_ID){
+            Message msg = mHandler.obtainMessage();
+            Bundle b = new Bundle();
+            b.putParcelable("Styles", data.getStyles());
+            msg.what = STILES_HANDLER;
+            msg.setData(b);
+            mHandler.sendMessage(msg);
+        } else if(loader.getId() == DataLoader.LOADER_ICONSETS_ID){
+            Message msg = mHandler.obtainMessage();
+            Bundle b = new Bundle();
+            b.putParcelable("IconSets", data.getIconSets());
+            msg.what = ICONSETS_HANDLER;
+            msg.setData(b);
+            mHandler.sendMessage(msg);
         }
+
     }
 
 
     final int ICONS_HANDLER = 1;
+    final int STILES_HANDLER = 2;
+    final int ICONSETS_HANDLER = 3;
+
     final Handler mHandler = new Handler(){
         public void handleMessage(Message msg) {
-            Bundle b;
             if(msg.what == ICONS_HANDLER){
+                Bundle b;
                 b=msg.getData();
                 Icons icons = b.getParcelable("Icons");
                 fillIcons(icons);
+            } else if(msg.what == STILES_HANDLER){
+                Bundle b;
+                b=msg.getData();
+                Styles styles = b.getParcelable("Styles");
+                fillStyles(styles);
+            } else if(msg.what == ICONSETS_HANDLER){
+                Bundle b;
+                b=msg.getData();
+                Iconsets iconSets = b.getParcelable("IconSets");
+                fillIconSets(iconSets);
             }
             super.handleMessage(msg);
         }
     };
 
     @Override
-    public void onLoaderReset(Loader<Icons> loader) {
-        offset = 0;
+    public void onLoaderReset(Loader<DataHolder> loader) {
+        if(loader.getId() == DataLoader.LOADER_ICONS_ID)
+            offset = 0;
     }
 
 
     synchronized private void fillIcons(Icons icons) {
-        if (DEBUG) Log.d(">>>", "Icons size = " + icons.getIcons().size());
+        if (DEBUG) Log.d(TAG, "Icons size = " + icons.getIcons().size());
 
         // Resolved After Loader implementation
         //if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
@@ -275,9 +274,9 @@ public class MainActivity extends ActionBarActivity
         Fragment iconsGridFragment = fragmentManager.findFragmentByTag(IconsGridFragment.class.getSimpleName());
         if (iconsGridFragment != null) {
             ((IconsGridFragment) iconsGridFragment).addIcons(icons);
-            if (DEBUG) Log.d(">>>", "fillIcons : addIcons");
+            if (DEBUG) Log.d(TAG, "fillIcons : addIcons");
         } else {
-            if (DEBUG) Log.d(">>>", "fillIcons : IconsGridFragment.newInstance");
+            if (DEBUG) Log.d(TAG, "fillIcons : IconsGridFragment.newInstance");
             iconsGridFragment = IconsGridFragment.newInstance(icons);
             // Add the fragment to the activity, pushing this transaction on to the back stack.
             FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -308,12 +307,11 @@ public class MainActivity extends ActionBarActivity
             urlIcons += "&style=" + styles.getStyles().get(stylesPosition).getIdentifier();
         }
 
-        Log.d(">>>", "urlIcons = " + urlIcons);
+        if ( DEBUG ) Log.d(">>>", "urlIcons = " + urlIcons);
 
         Bundle bundle = new Bundle();
-        bundle.putString(IconsLoader.ARGS_URL, urlIcons);
-        LoaderManager loaderManager = getSupportLoaderManager();
-        loaderManager.restartLoader(LOADER_ICONS_ID, bundle, MainActivity.this);
+        bundle.putString(DataLoader.ARGS_URL, urlIcons);
+        getSupportLoaderManager().restartLoader(DataLoader.LOADER_ICONS_ID, bundle, this);
 
 //        if (loaderManager.getLoader(LOADER_ICONS_ID) == null) {
 //            loaderManager.initLoader(LOADER_ICONS_ID, bundle, this);
@@ -351,7 +349,7 @@ public class MainActivity extends ActionBarActivity
      * @param icon
      */
     public void onClickIcon(Icon icon) {
-        Log.d(">>>", "Icons id = " + icon.getIconId());
+        if ( DEBUG ) Log.d(">>>", "Icons id = " + icon.getIconId());
 
         Fragment iconsDetailFragment = IconsDetailFragment.newInstance(icon);
         // Add the fragment to the activity, pushing this transaction on to the back stack.
@@ -372,19 +370,29 @@ public class MainActivity extends ActionBarActivity
         fragmentManager.popBackStack();
     }
 
+    /**
+     *
+     * Destroy all loaders
+     */
+    private void destroyLoaders(){
+        LoaderManager loaderManager = getSupportLoaderManager();
+        loaderManager.destroyLoader(DataLoader.LOADER_ICONS_ID);
+        loaderManager.destroyLoader(DataLoader.LOADER_ICONSETS_ID);
+        loaderManager.destroyLoader(DataLoader.LOADER_STYLES_ID);
+    }
+
     @Override
     protected void onStop () {
         super.onStop();
-        if (requestQueue != null) {
-            requestQueue.cancelAll(this);
-        }
+        destroyLoaders();
+
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
         for (Fragment fragment : allFragments) {
             if (fragment instanceof IconsGridFragment) {
                 ((IconsGridFragment)fragment).resetLoadingFlag();
             }
         }
-        Log.d(TAG, "onStop");
+        if ( DEBUG ) Log.d(TAG, "onStop");
     }
 
 
@@ -394,7 +402,7 @@ public class MainActivity extends ActionBarActivity
             mTitle = styles.getStyles().get(position).getName();
             ActionBar actionBar = getSupportActionBar();
             actionBar.setTitle(mTitle);
-            Log.d(TAG, "Title = " + mTitle.toString());
+            if ( DEBUG ) Log.d(TAG, "Title = " + mTitle.toString());
         }*/
     }
 
