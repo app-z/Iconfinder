@@ -8,7 +8,10 @@
         android:id="@+id/imgContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
+        android:gravity="center"
+        android:layout_toLeftOf="@+id/format"
+        android:layout_toStartOf="@+id/format"
+        android:minHeight="84dp">
         <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleLarge"
@@ -23,17 +26,18 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             />
+
     </RelativeLayout>
 
-        <TextView
-            android:id="@+id/format"
-            android:layout_below="@id/imgContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_alignBottom="@+id/downloadBtn"
-            android:text="format"
-            android:textSize="24sp"/>
+    <TextView
+        android:id="@+id/format"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="format"
+        android:textSize="24sp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
 
     <Button
         android:visibility="gone"
@@ -50,8 +54,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Preview"
-        android:layout_below="@+id/imgContainer"
-        android:layout_alignRight="@+id/imgContainer"/>
+        android:layout_alignBottom="@+id/imgContainer"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>
