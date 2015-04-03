@@ -35,7 +35,7 @@ public class MainActivity extends ActionBarActivity
         NavigationDrawerFragment.NavigationDrawerCallbacks{
 
     private static final boolean DEBUG = true;
-    private String TAG = "MainActivity>";
+    private String TAG = this.getClass().getSimpleName();
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -47,8 +47,6 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
 
-
-    // Instantiate the RequestQueue.
     //private String url = "https://api.iconfinder.com/v2/styles?count=10&after=&_=1427589491914";
     private String urlStylesTempl = "https://api.iconfinder.com" + "/v2/styles?_=%d";
 
@@ -125,7 +123,6 @@ public class MainActivity extends ActionBarActivity
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 stileTitles));
-
     }
 
 
@@ -138,6 +135,27 @@ public class MainActivity extends ActionBarActivity
                         PlaceholderFragment.newInstance(stylesPosition, iconsets),
                         PlaceholderFragment.class.getSimpleName())
                 .commit();
+    }
+
+    private void fillIcons(Icons icons) {
+        if (DEBUG) Log.d(TAG, "Icons size = " + icons.getIcons().size() + ": Total = " + icons.getTotalCount());
+
+        // Resolved After Loader implementation
+        //if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment iconsGridFragment = fragmentManager.findFragmentByTag(IconsGridFragment.class.getSimpleName());
+        if (iconsGridFragment != null) {
+            ((IconsGridFragment) iconsGridFragment).addIcons(icons);
+        } else {
+            iconsGridFragment = IconsGridFragment.newInstance(icons);
+            // Add the fragment to the activity, pushing this transaction on to the back stack.
+            FragmentTransaction ft = fragmentManager.beginTransaction();
+            ft.replace(R.id.container, iconsGridFragment, IconsGridFragment.class.getSimpleName());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            ft.addToBackStack(null);
+            ft.commit();
+        }
     }
 
 
@@ -153,7 +171,6 @@ public class MainActivity extends ActionBarActivity
             destroyLoaders();
 
             String urlIconsets = String.format(urlIconSetsTmpl, styles.getStyles().get(position).getIdentifier());
-
             // Download Iconsets
             Bundle bundle = new Bundle();
             bundle.putString(DataLoader.ARGS_URL, urlIconsets);
@@ -188,15 +205,18 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public Loader<DataHolder> onCreateLoader(int id, Bundle args) {
-        DataLoader dataLoader = new DataLoader(this, args);
-        return dataLoader;
+        return new DataLoader(this, args);
     }
 
+
+    final int ICONS_HANDLER = 1;
+    final int STILES_HANDLER = 2;
+    final int ICONSETS_HANDLER = 3;
 
     @Override
     public void onLoadFinished(Loader<DataHolder> loader, DataHolder data) {
         if(data == null ) {
-            // In Loader happened error
+            // In Loader happened error Volley
             AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
             return;
         }
@@ -220,10 +240,6 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    final int ICONS_HANDLER = 1;
-    final int STILES_HANDLER = 2;
-    final int ICONSETS_HANDLER = 3;
-
     final Handler mHandler = new Handler(){
         public void handleMessage(Message msg) {
             Bundle b;
@@ -246,28 +262,6 @@ public class MainActivity extends ActionBarActivity
     public void onLoaderReset(Loader<DataHolder> loader) {
         if(loader.getId() == DataLoader.LOADER_ICONS_ID)
             offset = 0;
-    }
-
-
-    synchronized private void fillIcons(Icons icons) {
-        if (DEBUG) Log.d(TAG, "Icons size = " + icons.getIcons().size() + ": Total = " + icons.getTotalCount());
-
-        // Resolved After Loader implementation
-        //if(!fragmentManager.isDestroyed()) {    // Check problem after rotation screen
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment iconsGridFragment = fragmentManager.findFragmentByTag(IconsGridFragment.class.getSimpleName());
-        if (iconsGridFragment != null) {
-            ((IconsGridFragment) iconsGridFragment).addIcons(icons);
-        } else {
-            iconsGridFragment = IconsGridFragment.newInstance(icons);
-            // Add the fragment to the activity, pushing this transaction on to the back stack.
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.replace(R.id.container, iconsGridFragment, IconsGridFragment.class.getSimpleName());
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            ft.addToBackStack(null);
-            ft.commit();
-        }
     }
 
 
