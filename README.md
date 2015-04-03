@@ -2,6 +2,8 @@
 
 Iconfinder Android client demo App
 
+See description on github http://habrahabr.ru/post/254801/
+
 Api iconfinder.com https://developer.iconfinder.com/api/2.0/index.html
 
 This just demo how to parse feed with Volley and use Fragments
