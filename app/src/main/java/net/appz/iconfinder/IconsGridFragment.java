@@ -1,5 +1,6 @@
 package net.appz.iconfinder;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -45,7 +46,15 @@ public class IconsGridFragment extends Fragment {
         // get listview current position - used to maintain scroll position
         int currentPosition = gridView.getFirstVisiblePosition();
 
-        iconsGridAdapter.addAll(icons.getIcons());
+        //If the platform supports it, use addAll, otherwise add in loop
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            iconsGridAdapter.addAll(icons.getIcons());
+        } else {
+            for(Icon icon: icons.getIcons()) {
+                iconsGridAdapter.add(icon);
+            }
+        }
+
 
         // Setting new scroll position
         gridView.setSelection(currentPosition + 1);

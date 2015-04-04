@@ -2,6 +2,7 @@ package net.appz.iconfinder;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,6 +27,7 @@ import net.appz.iconfinder.Data.Iconsets;
 import net.appz.iconfinder.Data.Style;
 import net.appz.iconfinder.Data.Styles;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -116,13 +118,15 @@ public class MainActivity extends ActionBarActivity
         for(Style style : styles.getStyles()) {
             stileTitles[i++] = style.getName();
         }
-
         // Set the adapter for the list view left menu
         mNavigationDrawerFragment.getDrawerListView().setAdapter(new ArrayAdapter<String>(
                 this,
-                android.R.layout.simple_list_item_activated_1,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+                        ? android.R.layout.simple_list_item_activated_1
+                        : android.R.layout.simple_list_item_1,
                 android.R.id.text1,
                 stileTitles));
+        if (DEBUG) Log.d(TAG, "fillStyles : " + Arrays.toString(stileTitles));
     }
 
 
