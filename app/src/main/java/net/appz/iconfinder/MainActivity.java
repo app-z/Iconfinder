@@ -137,7 +137,7 @@ public class MainActivity extends ActionBarActivity
                 .commit();
     }
 
-    private void fillIcons(Icons icons) {
+    synchronized private void fillIcons(Icons icons) {
         if (DEBUG) Log.d(TAG, "Icons size = " + icons.getIcons().size() + ": Total = " + icons.getTotalCount());
 
         // Resolved After Loader implementation
