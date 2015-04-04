@@ -4,51 +4,48 @@ package net.appz.iconfinder.Data;
  * Created by App-z.net on 02.04.15.
  */
 public class DataHolder {
-
     public static final int LOADER_ICONS_ID = 1;
     public static final int LOADER_STYLES_ID = 2;
     public static final int LOADER_ICONSETS_ID = 3;
 
-    private DataHolderItem styles;
-    private DataHolderItem icons;
-    private DataHolderItem iconsets;
+    private Styles styles;
+    private Icons icons;
+    private Iconsets iconsets;
 
-    private DataHolderItem getStyles(){
+    public Styles getStyles(){
         return styles;
     }
 
-    private void setStyles(DataHolderItem styles){
+    private void setStyles(Styles styles){
         this.styles = styles;
     }
 
-    public DataHolderItem getIconsets() {
+    public Iconsets getIconsets() {
         return iconsets;
     }
 
-    private void setIconsets(DataHolderItem iconsets){
+    private void setIconsets(Iconsets iconsets){
         this.iconsets = iconsets;
     }
 
-
-
-    private DataHolderItem getIcons(){
+    public Icons getIcons(){
         return icons;
     }
 
-    private void setIcons(DataHolderItem icons){
+    private void setIcons(Icons icons){
         this.icons = icons;
     }
 
     public void setData(int dataId, DataHolderItem item){
         switch (dataId){
             case LOADER_ICONS_ID:
-                setIcons(item);
+                setIcons((Icons)item);
                 break;
             case LOADER_STYLES_ID:
-                setStyles(item);
+                setStyles((Styles)item);
                 break;
             case LOADER_ICONSETS_ID:
-                setIconsets(item);
+                setIconsets((Iconsets)item);
                 break;
             default:
                 assert false : "Error LOADER ID";
@@ -85,5 +82,4 @@ public class DataHolder {
 
     public interface DataHolderItem{
     }
-
 }

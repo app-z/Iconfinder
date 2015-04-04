@@ -225,13 +225,14 @@ public class MainActivity extends ActionBarActivity
         Bundle b = new Bundle();
         if(loader.getId() == DataHolder.LOADER_ICONS_ID){
             offset += count;    // Prepare for next lazy load
-            b.putParcelable("Icons", (Icons) data.getData(loader.getId()));
+            //b.putParcelable("Icons", (Icons) data.getData(loader.getId()));
+            b.putParcelable("Icons", data.getIcons());
             msg.what = ICONS_HANDLER;
         } else if(loader.getId() == DataHolder.LOADER_STYLES_ID){
-            b.putParcelable("Styles", (Styles) data.getData(loader.getId()));
+            b.putParcelable("Styles", data.getStyles());
             msg.what = STILES_HANDLER;
         } else if(loader.getId() == DataHolder.LOADER_ICONSETS_ID){
-            b.putParcelable("IconSets", (Iconsets) data.getData(loader.getId()));
+            b.putParcelable("IconSets", data.getIconsets());
             msg.what = ICONSETS_HANDLER;
         }
         msg.setData(b);
