@@ -130,6 +130,7 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+
     private void fillIconSets(Iconsets iconsets) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
