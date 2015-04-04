@@ -98,7 +98,7 @@ public class MainActivity extends ActionBarActivity
             String urlStyles = String.format(urlStylesTempl, new Random().nextInt());
             Bundle bundle = new Bundle();
             bundle.putString(DataLoader.ARGS_URL, urlStyles);
-            getSupportLoaderManager().restartLoader(DataLoader.LOADER_STYLES_ID, bundle, this);
+            getSupportLoaderManager().restartLoader(DataHolder.LOADER_STYLES_ID, bundle, this);
         }
     }
 
@@ -174,7 +174,7 @@ public class MainActivity extends ActionBarActivity
             // Download Iconsets
             Bundle bundle = new Bundle();
             bundle.putString(DataLoader.ARGS_URL, urlIconsets);
-            getSupportLoaderManager().restartLoader(DataLoader.LOADER_ICONSETS_ID, bundle, this);
+            getSupportLoaderManager().restartLoader(DataHolder.LOADER_ICONSETS_ID, bundle, this);
         }
     }
 
@@ -187,7 +187,7 @@ public class MainActivity extends ActionBarActivity
         String urlStyles = String.format(urlStylesTempl, new Random().nextInt());
         Bundle bundle = new Bundle();
         bundle.putString(DataLoader.ARGS_URL, urlStyles);
-        getSupportLoaderManager().restartLoader(DataLoader.LOADER_STYLES_ID, bundle, this);
+        getSupportLoaderManager().restartLoader(DataHolder.LOADER_STYLES_ID, bundle, this);
 
         stylesPosition = -1;
         mTitle = getResources().getString(R.string.app_name);
@@ -223,15 +223,15 @@ public class MainActivity extends ActionBarActivity
 
         Message msg = mHandler.obtainMessage();
         Bundle b = new Bundle();
-        if(loader.getId() == DataLoader.LOADER_ICONS_ID){
+        if(loader.getId() == DataHolder.LOADER_ICONS_ID){
             offset += count;    // Prepare for next lazy load
-            b.putParcelable("Icons", data.getIcons());
+            b.putParcelable("Icons", (Icons) data.getData(loader.getId()));
             msg.what = ICONS_HANDLER;
-        } else if(loader.getId() == DataLoader.LOADER_STYLES_ID){
-            b.putParcelable("Styles", data.getStyles());
+        } else if(loader.getId() == DataHolder.LOADER_STYLES_ID){
+            b.putParcelable("Styles", (Styles) data.getData(loader.getId()));
             msg.what = STILES_HANDLER;
-        } else if(loader.getId() == DataLoader.LOADER_ICONSETS_ID){
-            b.putParcelable("IconSets", data.getIconSets());
+        } else if(loader.getId() == DataHolder.LOADER_ICONSETS_ID){
+            b.putParcelable("IconSets", (Iconsets) data.getData(loader.getId()));
             msg.what = ICONSETS_HANDLER;
         }
         msg.setData(b);
@@ -260,7 +260,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onLoaderReset(Loader<DataHolder> loader) {
-        if(loader.getId() == DataLoader.LOADER_ICONS_ID)
+        if(loader.getId() == DataHolder.LOADER_ICONS_ID)
             offset = 0;
     }
 
@@ -288,7 +288,7 @@ public class MainActivity extends ActionBarActivity
 
         Bundle bundle = new Bundle();
         bundle.putString(DataLoader.ARGS_URL, urlIcons);
-        getSupportLoaderManager().restartLoader(DataLoader.LOADER_ICONS_ID, bundle, this);
+        getSupportLoaderManager().restartLoader(DataHolder.LOADER_ICONS_ID, bundle, this);
 
     }
 
@@ -347,9 +347,9 @@ public class MainActivity extends ActionBarActivity
      */
     private void destroyLoaders(){
         LoaderManager loaderManager = getSupportLoaderManager();
-        loaderManager.destroyLoader(DataLoader.LOADER_ICONS_ID);
-        loaderManager.destroyLoader(DataLoader.LOADER_ICONSETS_ID);
-        loaderManager.destroyLoader(DataLoader.LOADER_STYLES_ID);
+        loaderManager.destroyLoader(DataHolder.LOADER_ICONS_ID);
+        loaderManager.destroyLoader(DataHolder.LOADER_ICONSETS_ID);
+        loaderManager.destroyLoader(DataHolder.LOADER_STYLES_ID);
     }
 
     @Override

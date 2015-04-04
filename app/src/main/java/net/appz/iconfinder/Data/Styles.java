@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by App-z.net on 29.03.15.
  */
-public class Styles implements Parcelable {
+public class Styles implements Parcelable, DataHolder.DataHolderItem {
 
     @Expose
     private List<Style> styles; // = new ArrayList<Style>();

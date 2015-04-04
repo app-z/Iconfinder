@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by App-z.net on 29.03.15.
  */
-public class Icons implements Parcelable {
+public class Icons implements Parcelable, DataHolder.DataHolderItem{
 
     @SerializedName("total_count")
     @Expose
