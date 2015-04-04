@@ -2,31 +2,48 @@
 
 Iconfinder Android client demo App
 
-See description on github http://habrahabr.ru/post/254801/
+See description on habrhabr http://habrahabr.ru/post/254801/
 
 Api iconfinder.com https://developer.iconfinder.com/api/2.0/index.html
 
-This just demo how to parse feed with Volley and use Fragments
+This just demo how to parse feed with Volley Loader and use Fragments
 
 ```
-private String urlStyles = "https://api.iconfinder.com" + "/v2/styles";
+public class DataLoader extends Loader<DataHolder> {
 
 ...
 
-final GsonRequest gsonRequest = new GsonRequest(urlStyles, Styles.class, null, new Response.Listener<Styles>() {
+    @Override
+    public void onForceLoad() {
+        super.onForceLoad();
+        if ( DEBUG ) Log.d(TAG, "Loader onForceLoad() : feedUrl = " + urlFeed);
+        doRequest(DataHolder.getClazz(getId()));
+    }
+
+    /**
+     *
+     * Get Data
+     */
+    private void doRequest(Class<?> clazz) {
+        final GsonRequest gsonRequest = new GsonRequest(urlFeed,
+                clazz,
+                null,
+                new Response.Listener<DataHolder.DataHolderItem>() {
             @Override
-            public void onResponse(Styles styles) {
-                fillStyles(styles);
+            public void onResponse(DataHolder.DataHolderItem data) {
+                dataHolder.setData(getId(), data);
+                deliverResult(dataHolder);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                if(volleyError != null)
-                    Log.e(TAG, volleyError.getMessage());
+                if (volleyError != null)
+                    if (DEBUG) Log.e(TAG, "volleyError: " + volleyError.getMessage());
+                deliverResult(null);
             }
         });
-        gsonRequest.setTag("Styles");
         requestQueue.add(gsonRequest);
+    }
 
 ```
 
