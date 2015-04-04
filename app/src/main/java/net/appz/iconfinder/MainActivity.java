@@ -347,6 +347,7 @@ public class MainActivity extends ActionBarActivity
      * Destroy all loaders
      */
     private void destroyLoaders(){
+        mHandler.removeCallbacksAndMessages(null);
         LoaderManager loaderManager = getSupportLoaderManager();
         loaderManager.destroyLoader(DataHolder.LOADER_ICONS_ID);
         loaderManager.destroyLoader(DataHolder.LOADER_ICONSETS_ID);
