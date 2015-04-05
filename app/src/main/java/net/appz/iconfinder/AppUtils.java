@@ -2,7 +2,6 @@ package net.appz.iconfinder;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
@@ -103,7 +102,51 @@ public class AppUtils {
 
     }
 
+/*
+    final int ICONS_HANDLER = 1;
+    final int STILES_HANDLER = 2;
+    final int ICONSETS_HANDLER = 3;
 
+    void doLoaderHandler(Loader<DataHolder> loader, DataHolder data){
+        /*        Message msg = mHandler.obtainMessage();
+        Bundle b = new Bundle();
+        if(loader.getId() == DataHolder.LOADER_ICONS_ID){
+            offset += count;    // Prepare for next lazy load
+            //b.putParcelable("Icons", (Icons) data.getData(loader.getId()));
+            b.putParcelable("Icons", data.getIcons());
+            msg.what = ICONS_HANDLER;
+        } else if(loader.getId() == DataHolder.LOADER_STYLES_ID){
+            b.putParcelable("Styles", data.getStyles());
+            msg.what = STILES_HANDLER;
+        } else if(loader.getId() == DataHolder.LOADER_ICONSETS_ID){
+            b.putParcelable("IconSets", data.getIconsets());
+            msg.what = ICONSETS_HANDLER;
+        }
+        msg.setData(b);
+        mHandler.sendMessage(msg);
+    }
+
+
+    final Handler mHandler = new Handler(){
+        public void handleMessage(Message msg) {
+            Bundle b;
+            b=msg.getData();
+            if(msg.what == ICONS_HANDLER){
+                Icons icons = b.getParcelable("Icons");
+                fillIcons(icons);
+            } else if(msg.what == STILES_HANDLER){
+                Styles styles = b.getParcelable("Styles");
+                fillStyles(styles);
+            } else if(msg.what == ICONSETS_HANDLER){
+                Iconsets iconSets = b.getParcelable("IconSets");
+                fillIconSets(iconSets);
+            }
+            super.handleMessage(msg);
+        }
+    };
+
+
+    */
 
 
     /**

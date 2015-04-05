@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -214,55 +214,30 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    final int ICONS_HANDLER = 1;
-    final int STILES_HANDLER = 2;
-    final int ICONSETS_HANDLER = 3;
 
     @Override
-    public void onLoadFinished(Loader<DataHolder> loader, DataHolder data) {
+    public void onLoadFinished(final Loader<DataHolder> loader, final DataHolder data) {
         if(data == null ) {
             // In Loader happened error Volley
             AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
             return;
         }
 
-        Message msg = mHandler.obtainMessage();
-        Bundle b = new Bundle();
-        if(loader.getId() == DataHolder.LOADER_ICONS_ID){
-            offset += count;    // Prepare for next lazy load
-            //b.putParcelable("Icons", (Icons) data.getData(loader.getId()));
-            b.putParcelable("Icons", data.getIcons());
-            msg.what = ICONS_HANDLER;
-        } else if(loader.getId() == DataHolder.LOADER_STYLES_ID){
-            b.putParcelable("Styles", data.getStyles());
-            msg.what = STILES_HANDLER;
-        } else if(loader.getId() == DataHolder.LOADER_ICONSETS_ID){
-            b.putParcelable("IconSets", data.getIconsets());
-            msg.what = ICONSETS_HANDLER;
-        }
-        msg.setData(b);
-        mHandler.sendMessage(msg);
-
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                if(loader.getId() == DataHolder.LOADER_ICONS_ID){
+                    offset += count;    // Prepare for next lazy load
+                    fillIcons(data.getIcons());
+                } else if(loader.getId() == DataHolder.LOADER_STYLES_ID){
+                    fillStyles(data.getStyles());
+                } else if(loader.getId() == DataHolder.LOADER_ICONSETS_ID){
+                    fillIconSets(data.getIconsets());
+                }
+            }
+        });
     }
 
-
-    final Handler mHandler = new Handler(){
-        public void handleMessage(Message msg) {
-            Bundle b;
-            b=msg.getData();
-            if(msg.what == ICONS_HANDLER){
-                Icons icons = b.getParcelable("Icons");
-                fillIcons(icons);
-            } else if(msg.what == STILES_HANDLER){
-                Styles styles = b.getParcelable("Styles");
-                fillStyles(styles);
-            } else if(msg.what == ICONSETS_HANDLER){
-                Iconsets iconSets = b.getParcelable("IconSets");
-                fillIconSets(iconSets);
-            }
-            super.handleMessage(msg);
-        }
-    };
 
     @Override
     public void onLoaderReset(Loader<DataHolder> loader) {
@@ -352,7 +327,6 @@ public class MainActivity extends ActionBarActivity
      * Destroy all loaders
      */
     private void destroyLoaders(){
-        mHandler.removeCallbacksAndMessages(null);
         LoaderManager loaderManager = getSupportLoaderManager();
         loaderManager.destroyLoader(DataHolder.LOADER_ICONS_ID);
         loaderManager.destroyLoader(DataHolder.LOADER_ICONSETS_ID);
