@@ -236,11 +236,11 @@ public class MainActivity extends ActionBarActivity
         handler.postDelayed(new Runnable() {
             public void run() {
                 closeOverlayFragment();
+                // Reset flag fo continue load after error gone
                 Fragment fragment = getSupportFragmentManager().
                         findFragmentByTag(IconsGridFragment.class.getSimpleName());
-                if (fragment != null)   // Reset flag fo continue load after error gone
+                if (fragment != null)
                     ((IconsGridFragment)fragment).resetLoadingFlag();
-
             }
         }, 5000);
     }
@@ -391,7 +391,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onStop () {
         super.onStop();
-        destroyLoaders();
+        //destroyLoaders();
 
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
         for (Fragment fragment : allFragments) {
