@@ -1,5 +1,7 @@
 package net.appz.iconfinder.Data;
 
+import com.android.volley.VolleyError;
+
 /**
  * Created by App-z.net on 02.04.15.
  */
@@ -11,6 +13,7 @@ public class DataHolder {
     private Styles styles;
     private Icons icons;
     private Iconsets iconsets;
+    private VolleyError error;
 
     public Styles getStyles(){
         return styles;
@@ -79,6 +82,14 @@ public class DataHolder {
             }
             return null;
         }
+
+    public void setError(VolleyError error) {
+        this.error = error;
+    }
+
+    public VolleyError getError() {
+        return error;
+    }
 
     public interface DataHolderItem{
     }

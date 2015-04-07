@@ -75,14 +75,14 @@ public class DataLoader extends Loader<DataHolder> {
             @Override
             public void onResponse(DataHolder.DataHolderItem data) {
                 dataHolder.setData(getId(), data);
+                dataHolder.setError(null);
                 deliverResult(dataHolder);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                if (volleyError != null)
-                    if (DEBUG) Log.e(TAG, "volleyError: " + volleyError.getMessage());
-                deliverResult(null);
+                dataHolder.setError(volleyError);
+                deliverResult(dataHolder);
             }
         });
         requestQueue.add(gsonRequest);

@@ -20,6 +20,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.VolleyError;
+
 import net.appz.iconfinder.Data.DataHolder;
 import net.appz.iconfinder.Data.Icon;
 import net.appz.iconfinder.Data.Icons;
@@ -34,7 +37,8 @@ import java.util.Random;
 
 public class MainActivity extends ActionBarActivity
         implements LoaderManager.LoaderCallbacks<DataHolder>,
-        NavigationDrawerFragment.NavigationDrawerCallbacks{
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
+        OverlayMessageFragment.OverlayMessageFragmentCallbacks{
 
     private static final boolean DEBUG = true;
     private String TAG = this.getClass().getSimpleName();
@@ -50,7 +54,7 @@ public class MainActivity extends ActionBarActivity
     private CharSequence mTitle;
 
     //private String url = "https://api.iconfinder.com/v2/styles?count=10&after=&_=1427589491914";
-    private String urlStylesTempl = "https://api.iconfinder.com" + "/v2/styles?_=%d";
+    private static final String urlStylesTempl = "https://api.iconfinder.com" + "/v2/styles?_=%d";
 
     private static final String urlIconSetsTmpl = "https://api.iconfinder.com" + "/v2/styles/%s/iconsets";
 
@@ -128,8 +132,6 @@ public class MainActivity extends ActionBarActivity
                 stileTitles));
         if (DEBUG) Log.d(TAG, "fillStyles : " + Arrays.toString(stileTitles));
     }
-
-
 
     private void fillIconSets(Iconsets iconsets) {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -214,12 +216,65 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    @Override
+    public void onOverlayClick() {
+        closeOverlayFragment();
+    }
+
+    void closeOverlayFragment(){
+        Fragment fragment = getSupportFragmentManager().
+                findFragmentByTag(OverlayMessageFragment.class.getSimpleName());
+        if(fragment != null){
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
+            ft.remove(fragment).commit();
+        }
+    }
+
+    private void closeOverlayDelay() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                closeOverlayFragment();
+                Fragment fragment = getSupportFragmentManager().
+                        findFragmentByTag(IconsGridFragment.class.getSimpleName());
+                if (fragment != null)   // Reset flag fo continue load after error gone
+                    ((IconsGridFragment)fragment).resetLoadingFlag();
+
+            }
+        }, 5000);
+    }
+
 
     @Override
     public void onLoadFinished(final Loader<DataHolder> loader, final DataHolder data) {
-        if(data == null ) {
-            // In Loader happened error Volley
-            AppUtils.showDialog(MainActivity.this, "Error", "Server request error. Try again later", false);
+        VolleyError volleyError = data.getError();
+        if (volleyError != null) {
+            if (DEBUG) Log.e(TAG, "volleyError message: " + volleyError.getMessage());
+            NetworkResponse networkResponse = volleyError.networkResponse;
+            if (networkResponse != null && networkResponse.statusCode == 429) {
+                // HTTP Status Code: 429
+                if (DEBUG) Log.e(TAG, "volleyError statusCode: " + networkResponse.statusCode);
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Fragment fragment = getSupportFragmentManager().
+                                findFragmentByTag(OverlayMessageFragment.class.getSimpleName());
+                        if(fragment == null) {
+                            Fragment overlayMessageFragment = OverlayMessageFragment.newInstance("Server Error 429. Too too many requests. Try later");
+                            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                            ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
+                            ft.add(R.id.container, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
+                            ft.commit();
+                            closeOverlayDelay();
+                        }
+                    }
+                });
+                return;
+
+            }
+
             return;
         }
 
@@ -388,7 +443,6 @@ public class MainActivity extends ActionBarActivity
 
         return super.onOptionsItemSelected(item);
     }
-
 
 
 }
