@@ -54,9 +54,13 @@ public class OverlayMessageFragment extends Fragment {
             }
         });
 
+        Bundle b = getArguments();
+        if( b != null ) {
+            String text = b.getString(ARG_MESSAGE);
+            TextView message = (TextView) rootView.findViewById(R.id.messageText);
+            message.setText(text);
+        }
 
-        TextView message = (TextView) rootView.findViewById(R.id.messageText);
-        message.setText(getArguments().getString(ARG_MESSAGE));
         return rootView;
     }
 
@@ -70,6 +74,12 @@ public class OverlayMessageFragment extends Fragment {
         }
     }
 
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
 
     public static interface OverlayMessageFragmentCallbacks{
         void onOverlayClick();
