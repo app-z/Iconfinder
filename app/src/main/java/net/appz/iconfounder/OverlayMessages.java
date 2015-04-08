@@ -9,7 +9,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
 /**
- * Created by spbmap on 08.04.15.
+ * Created by App-z on 08.04.15.
+ *
+ * Not include in project. For future use
  */
 public class OverlayMessages {
 

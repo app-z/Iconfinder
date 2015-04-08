@@ -232,9 +232,8 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    private void closeOverlayDelay(final int closeDelay) {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+    synchronized private void closeOverlayDelay(final int closeDelay) {
+        new Handler().postDelayed(new Runnable() {
             public void run() {
                 closeOverlayFragment();
                 // Reset flag fo continue load after error gone
@@ -347,7 +346,7 @@ public class MainActivity extends ActionBarActivity
      *
      */
     public void onLazyLoadMore() {
-        // showOverlay("Load more from " + offset + ". Wait...", 3000);
+        showOverlay("Load more from " + offset + ". Wait...", 2000);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String query = prefs.getString("query", "facebook");
         queryIcons(query);

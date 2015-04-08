@@ -5,7 +5,9 @@
     android:layout_height="wrap_content"
     android:layout_gravity="right"
     android:layout_margin="8dp"
-    android:background="@color/accent_material_dark">
+    android:background="#ff80cbc4"
+    android:clickable="true"
+    >
 
     <TextView
         android:id="@+id/messageText"
