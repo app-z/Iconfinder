@@ -154,6 +154,9 @@ public class MainActivity extends ActionBarActivity
         Fragment iconsGridFragment = fragmentManager.findFragmentByTag(IconsGridFragment.class.getSimpleName());
         if (iconsGridFragment != null) {
             ((IconsGridFragment) iconsGridFragment).addIcons(icons);
+            if ( ((IconsGridFragment) iconsGridFragment).getCountItems() == icons.getTotalCount() ){
+                showOverlay("All Icons was loaded");
+            }
         } else {
             iconsGridFragment = IconsGridFragment.newInstance(icons);
             // Add the fragment to the activity, pushing this transaction on to the back stack.
@@ -163,6 +166,7 @@ public class MainActivity extends ActionBarActivity
             ft.addToBackStack(null);
             ft.commit();
         }
+
     }
 
 
