@@ -246,7 +246,6 @@ public class MainActivity extends ActionBarActivity
             ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
             ft.replace(R.id.overlay, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
             ft.commit();
-            //closeOverlayDelay(closeDelay);
         }else {
             ((OverlayMessageFragment) fragment).addMessage(text);
         }
@@ -257,7 +256,10 @@ public class MainActivity extends ActionBarActivity
     public void onLoadFinished(final Loader<DataHolder> loader, final DataHolder data) {
         VolleyError volleyError = data.getError();
         if (volleyError != null) {
-            if (DEBUG) Log.e(TAG, "volleyError message: " + volleyError.getMessage());
+            if (DEBUG) Log.e(TAG, "volleyError message: " + volleyError);
+            if( volleyError.getMessage() != null )
+                showOverlay(volleyError.getMessage());
+
             NetworkResponse networkResponse = volleyError.networkResponse;
             if (networkResponse != null && networkResponse.statusCode == 429) {
                 // HTTP Status Code: 429
@@ -269,9 +271,8 @@ public class MainActivity extends ActionBarActivity
                         showOverlay("Server Error 429. Too many requests. Try later");
                     }
                 });
-                resetLoadFlagAfterDelay(5000);
-                return;
             }
+            resetLoadFlagAfterDelay(5000);
             return;
         }
 
