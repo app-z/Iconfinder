@@ -231,7 +231,8 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    private void closeOverlayDelay(int closeDelay) {
+
+    private void closeOverlayDelay(final int closeDelay) {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
@@ -241,6 +242,7 @@ public class MainActivity extends ActionBarActivity
                         findFragmentByTag(IconsGridFragment.class.getSimpleName());
                 if (fragment != null)
                     ((IconsGridFragment)fragment).resetLoadingFlag();
+
             }
         }, closeDelay);
     }
@@ -252,10 +254,11 @@ public class MainActivity extends ActionBarActivity
             Fragment overlayMessageFragment = OverlayMessageFragment.newInstance(text);
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
-            ft.add(R.id.container, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
+            ft.replace(R.id.overlay, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
             ft.commit();
             closeOverlayDelay(closeDelay);
         }
+        if (DEBUG) Log.e(TAG, "showOverlay: " + fragment  + " : " + text + " : " + closeDelay);
     }
 
     @Override
@@ -344,7 +347,7 @@ public class MainActivity extends ActionBarActivity
      *
      */
     public void onLazyLoadMore() {
-        showOverlay("Load more. Wait...", 1000);
+        // showOverlay("Load more from " + offset + ". Wait...", 3000);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String query = prefs.getString("query", "facebook");
         queryIcons(query);
