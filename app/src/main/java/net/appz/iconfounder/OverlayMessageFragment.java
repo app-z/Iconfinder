@@ -34,9 +34,8 @@ public class OverlayMessageFragment extends Fragment {
 
     private OverlayMessageFragmentCallbacks mCallbacks;
 
-    final List<Map<String, String>> messages = new ArrayList<>();
-
-   final private static String MESSAGE = "message";
+    final List<Map<String, String>> messages = Collections.synchronizedList(new ArrayList<Map<String, String>>());
+    final private static String MESSAGE = "message";
 
     SimpleAdapter adapter;
     ListView listView;
@@ -74,7 +73,6 @@ public class OverlayMessageFragment extends Fragment {
                 }
             }
         });
-
     }
 
     private static Timer timer;
