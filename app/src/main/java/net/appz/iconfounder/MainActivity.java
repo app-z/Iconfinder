@@ -231,7 +231,7 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    private void closeOverlayDelay() {
+    private void closeOverlayDelay(int closeDelay) {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
@@ -242,9 +242,17 @@ public class MainActivity extends ActionBarActivity
                 if (fragment != null)
                     ((IconsGridFragment)fragment).resetLoadingFlag();
             }
-        }, 5000);
+        }, closeDelay);
     }
 
+    private void showOverlay(String text, int closeDelay){
+        Fragment overlayMessageFragment = OverlayMessageFragment.newInstance(text);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
+        ft.add(R.id.container, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
+        ft.commit();
+        closeOverlayDelay(closeDelay);
+    }
 
     @Override
     public void onLoadFinished(final Loader<DataHolder> loader, final DataHolder data) {
@@ -262,19 +270,12 @@ public class MainActivity extends ActionBarActivity
                         Fragment fragment = getSupportFragmentManager().
                                 findFragmentByTag(OverlayMessageFragment.class.getSimpleName());
                         if(fragment == null) {
-                            Fragment overlayMessageFragment = OverlayMessageFragment.newInstance("Server Error 429. Too many requests. Try later");
-                            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                            ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
-                            ft.add(R.id.container, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
-                            ft.commit();
-                            closeOverlayDelay();
+                            showOverlay("Server Error 429. Too many requests. Try later", 5000);
                         }
                     }
                 });
                 return;
-
             }
-
             return;
         }
 
@@ -344,6 +345,11 @@ public class MainActivity extends ActionBarActivity
      *
      */
     public void onLazyLoadMore() {
+        Fragment fragment = getSupportFragmentManager().
+                findFragmentByTag(OverlayMessageFragment.class.getSimpleName());
+        if(fragment == null) {
+            showOverlay("Load more. Wait...", 1000);
+        }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String query = prefs.getString("query", "facebook");
         queryIcons(query);
