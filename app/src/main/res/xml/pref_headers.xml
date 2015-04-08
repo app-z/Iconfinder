@@ -2,7 +2,7 @@
 
     <!-- These settings headers are only used on tablets. -->
 
-    <header android:fragment="net.appz.iconfinder.SettingsActivity$GeneralPreferenceFragment"
+    <header android:fragment="net.appz.iconfounder.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
 </preference-headers>
