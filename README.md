@@ -6,6 +6,8 @@ See description on habrhabr http://habrahabr.ru/post/254801/
 
 Api iconfinder.com https://developer.iconfinder.com/api/2.0/index.html
 
+Google Play https://play.google.com/store/apps/details?id=net.appz.iconfounder
+
 This just demo how to parse feed with Volley Loader and use Fragments
 
 ```
