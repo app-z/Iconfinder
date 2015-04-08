@@ -218,46 +218,35 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onOverlayClick() {
-        closeOverlayFragment();
+        // Nothing on click
     }
 
-    void closeOverlayFragment(){
-        Fragment fragment = getSupportFragmentManager().
-                findFragmentByTag(OverlayMessageFragment.class.getSimpleName());
-        if(fragment != null){
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
-            ft.remove(fragment).commit();
-        }
-    }
-
-
-    synchronized private void closeOverlayDelay(final int closeDelay) {
+    synchronized private void resetLoadFlagAfterDelay(final int delay) {
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                closeOverlayFragment();
                 // Reset flag fo continue load after error gone
                 Fragment fragment = getSupportFragmentManager().
                         findFragmentByTag(IconsGridFragment.class.getSimpleName());
                 if (fragment != null)
                     ((IconsGridFragment)fragment).resetLoadingFlag();
-
             }
-        }, closeDelay);
+        }, delay);
     }
 
-    private void showOverlay(String text, int closeDelay){
+    private void showOverlay(String text){
         Fragment fragment = getSupportFragmentManager().
                 findFragmentByTag(OverlayMessageFragment.class.getSimpleName());
         if(fragment == null) {
-            Fragment overlayMessageFragment = OverlayMessageFragment.newInstance(text);
+            Fragment overlayMessageFragment = OverlayMessageFragment.newInstance();
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
             ft.replace(R.id.overlay, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
             ft.commit();
-            closeOverlayDelay(closeDelay);
+            //closeOverlayDelay(closeDelay);
+        }else {
+            ((OverlayMessageFragment) fragment).addMessage(text);
         }
-        if (DEBUG) Log.e(TAG, "showOverlay: " + fragment  + " : " + text + " : " + closeDelay);
+        if (DEBUG) Log.e(TAG, "showOverlay: " + fragment  + " : " + text );
     }
 
     @Override
@@ -273,9 +262,10 @@ public class MainActivity extends ActionBarActivity
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        showOverlay("Server Error 429. Too many requests. Try later", 5000);
+                        showOverlay("Server Error 429. Too many requests. Try later");
                     }
                 });
+                resetLoadFlagAfterDelay(5000);
                 return;
             }
             return;
@@ -346,7 +336,7 @@ public class MainActivity extends ActionBarActivity
      *
      */
     public void onLazyLoadMore() {
-        showOverlay("Load more from " + offset + ". Wait...", 2000);
+        showOverlay("Loading more from " + offset + ". Wait...");
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String query = prefs.getString("query", "facebook");
         queryIcons(query);

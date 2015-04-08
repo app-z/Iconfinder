@@ -60,7 +60,7 @@ public class OverlayMessages {
         Fragment fragment = fragmentManeger.
                 findFragmentByTag(OverlayMessageFragment.class.getSimpleName());
         //if(fragment == null) {
-        Fragment overlayMessageFragment = OverlayMessageFragment.newInstance(text);
+        Fragment overlayMessageFragment = OverlayMessageFragment.newInstance();
         FragmentTransaction ft = fragmentManeger.beginTransaction();
         ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
         ft.replace(R.id.overlay, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
