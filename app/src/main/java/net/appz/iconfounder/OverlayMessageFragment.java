@@ -51,7 +51,6 @@ public class OverlayMessageFragment extends Fragment {
 
     public OverlayMessageFragment(){}
 
-
     public void addMessage(String text){
         //stopTimer();
         //startTimer();
