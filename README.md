@@ -1,6 +1,6 @@
 # Iconfounder
 
-Iconfinder Android client demo App
+Iconfounder Android client demo App
 
 See description on habrhabr http://habrahabr.ru/post/254801/
 
