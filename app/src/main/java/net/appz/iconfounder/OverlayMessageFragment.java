@@ -19,6 +19,7 @@ import android.widget.SimpleAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -44,7 +45,7 @@ public class OverlayMessageFragment extends Fragment {
         }
     } */
 
-    private final List<Map<String, Object>> messages = Collections.synchronizedList(new ArrayList<Map<String, Object>>());
+    private final List<Map<String, Object>> messages = new ArrayList<Map<String, Object>>();
     private final static String MESSAGE = "message";
     private final static String TIMESTAMP = "timestamp";
 
@@ -64,14 +65,21 @@ public class OverlayMessageFragment extends Fragment {
 
     public OverlayMessageFragment(){}
 
-    synchronized public void addMessage(String text){
-        final Map<String, Object> listItemMap = new HashMap<String, Object>();
-        listItemMap.put(MESSAGE, text);
+    public void addMessage(String text){
+        synchronized (messages) {
+            long ts = System.currentTimeMillis();
+            if(messages.size() > 0){
+                ts = (long)messages.get(0).get(TIMESTAMP);
+                ts += showTime * (messages.size() - 1);
+            }
+            ts += showTime;
 
-        long ts = System.currentTimeMillis() + showTime + showTime * messages.size();
-        if (DEBUG) Log.e(TAG, "ts added : " + ts);
-        listItemMap.put(TIMESTAMP, ts);
-        messages.add(Collections.unmodifiableMap(listItemMap));
+            final Map<String, Object> message = new HashMap<String, Object>();
+            message.put(MESSAGE, text);
+            message.put(TIMESTAMP, ts);
+            if (DEBUG) Log.e(TAG, "ts added : " + ts + " : " + message);
+            messages.add(Collections.unmodifiableMap(message));
+        }
         adapter.notifyDataSetChanged();
         listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter)*1.05);
     }
@@ -80,13 +88,22 @@ public class OverlayMessageFragment extends Fragment {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                if( adapter != null && messages.size() > 0 ) {
+                if (adapter != null && messages.size() > 0) {
                     //messages.remove(0);
-                    final Map<String, Object> listItemMap = messages.get(0);
-                    long ts = (long) listItemMap.get(TIMESTAMP);
-                    if (DEBUG) Log.e(TAG, "ts removed : " + (ts - System.currentTimeMillis()));
-                    if( ts < System.currentTimeMillis() ) {
-                        messages.remove(0);
+                    boolean changed = false;
+                    synchronized (messages) {
+                        Iterator<Map<String, Object>> it = messages.iterator();
+                        while(it.hasNext()){
+                            Map<String, Object> message = it.next();
+                            long ts = (long) message.get(TIMESTAMP);
+                            if (DEBUG) Log.e(TAG, "ts removed : " + (ts - System.currentTimeMillis()) + " : " + message);
+                            if (ts < System.currentTimeMillis()) {
+                                it.remove();
+                                changed = true;
+                            }
+                        }
+                    }
+                    if(changed) {
                         adapter.notifyDataSetChanged();
                         listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
                     }
@@ -107,7 +124,7 @@ public class OverlayMessageFragment extends Fragment {
             }
         };
         timer = new Timer();
-        timer.schedule(timertask, timer_cycle, timer_cycle); // execute in every N ms
+        timer.schedule(timertask, 0, timer_cycle); // execute in every N ms
     }
 
     private void stopTimer(){

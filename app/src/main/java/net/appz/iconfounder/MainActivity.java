@@ -31,7 +31,6 @@ import net.appz.iconfounder.Data.Style;
 import net.appz.iconfounder.Data.Styles;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 
@@ -390,14 +389,7 @@ public class MainActivity extends ActionBarActivity
     protected void onStop () {
         super.onStop();
         //destroyLoaders();
-
-        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-        for (Fragment fragment : allFragments) {
-            if (fragment instanceof IconsGridFragment) {
-                ((IconsGridFragment)fragment).resetLoadingFlag();
-            }
-        }
-        if ( DEBUG ) Log.d(TAG, "onStop");
+        resetLoadFlagAfterDelay(100);
     }
 
 
