@@ -87,29 +87,36 @@ public class OverlayMessageFragment extends Fragment {
     }
 
     private void removeMessageOfTimeOut(){
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (adapter != null && messages.size() > 0) {
-                    boolean changed = false;
-                    synchronized (messages) {
-                        int i=0;    // fu*k! need for getChildAt
-                        Iterator<Map<String, Object>> it = messages.iterator();
-                        while(it.hasNext()){
-                            Map<String, Object> message = it.next();
-                            long ts = (long) message.get(TIMESTAMP);
-                            if (DEBUG) Log.e(TAG, "ts removed : " + (ts - System.currentTimeMillis()) + " : " + message);
-                            if (ts < System.currentTimeMillis()) {
-                                it.remove();
-                                changed = true;
-                                listView.getChildAt(i).startAnimation(animation2);
+        if( adapter != null && animation1 != null && animation2 != null
+            && !isAnimation1Started && !isAnimation2Started){
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    if ( messages.size() > 0 ) {
+                        boolean changed = false;
+                        synchronized (messages) {
+                            int i = 0;    // fu*k! need for getChildAt
+                            Iterator<Map<String, Object>> it = messages.iterator();
+                            while (it.hasNext()) {
+                                Map<String, Object> message = it.next();
+                                long ts = (long) message.get(TIMESTAMP);
+                                if (DEBUG)
+                                    Log.e(TAG, "ts removed : " + (ts - System.currentTimeMillis()) + " : " + message);
+                                if (ts < System.currentTimeMillis()) {
+                                    it.remove();
+                                    changed = true;
+                                    //isAnimation2Started = true;
+                                    //listView.getChildAt(i).startAnimation(animation2);
+                                    adapter.notifyDataSetChanged();
+                                }
+                                i++;
                             }
-                            i++;
                         }
                     }
                 }
-            }
-        });
+            });
+
+        }
     }
 
     private static Timer timer;
@@ -148,18 +155,18 @@ public class OverlayMessageFragment extends Fragment {
 
         initAnimation();
 
-
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                synchronized (messages) {
-                    messages.remove(position);
+                if( !isAnimation1Started && !isAnimation2Started ){
+                    clickPosition = position;
+                    if (DEBUG) Log.e(TAG, "OnItemClickListener : " + position + " : isAnimation1Started = " + isAnimation1Started);
+                    isAnimation1Started = true;
+                    view.startAnimation(animation1);
                 }
-                if (DEBUG) Log.e(TAG, "OnItemClickListener : " + position);
-                view.startAnimation(animation1);
             }
         });
+
 
 
         adapter = new SimpleAdapter(getActivity(),
@@ -172,6 +179,8 @@ public class OverlayMessageFragment extends Fragment {
         listView.setAdapter(adapter);
         return rootView;
     }
+
+    int clickPosition;
 
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
@@ -191,7 +200,7 @@ public class OverlayMessageFragment extends Fragment {
             throw new ClassCastException("Activity must implement OverlayMessageFragment.");
         }
 
-        startTimer();
+       startTimer();
     }
 
 
@@ -206,6 +215,8 @@ public class OverlayMessageFragment extends Fragment {
         void onOverlayClick();
     }
 
+    boolean isAnimation1Started = false;
+    boolean isAnimation2Started = false;
 
     /**
      *
@@ -227,8 +238,21 @@ public class OverlayMessageFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                adapter.notifyDataSetChanged();
-                listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (messages) {
+                            messages.remove(clickPosition);
+                        }
+                        adapter.notifyDataSetChanged();
+                        listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
+                    }
+                });
+
+                isAnimation1Started = false;
+                if (DEBUG) Log.e(TAG, "onAnimation1End : isAnimation1Started = " + isAnimation1Started);
+                if (DEBUG) Log.e(TAG, "onAnimation1End : isAnimation2Started = " + isAnimation2Started);
+
             }
         });
 
@@ -243,12 +267,13 @@ public class OverlayMessageFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                adapter.notifyDataSetChanged();
-                listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
+                //listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
+                isAnimation2Started = false;
+                if (DEBUG) Log.e(TAG, "onAnimation2End : isAnimation1Started = " + isAnimation1Started);
+                if (DEBUG) Log.e(TAG, "onAnimation2End : isAnimation2Started = " + isAnimation2Started);
             }
         });
     }
-
 
 
     // http://stackoverflow.com/questions/6547154/wrap-content-for-a-listviews-width
