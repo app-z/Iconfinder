@@ -105,14 +105,14 @@ public class OverlayMessageFragment extends Fragment {
                                 if (ts < System.currentTimeMillis()) {
                                     it.remove();
                                     changed = true;
-                                    //isAnimation2Started = true;
-                                    //listView.getChildAt(i).startAnimation(animation2);
-                                    adapter.notifyDataSetChanged();
                                 }
                                 i++;
                             }
                         }
                     }
+                    if(changed)
+                        adapter.notifyDataSetChanged();
+
                 }
             });
 

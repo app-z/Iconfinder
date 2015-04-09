@@ -269,7 +269,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     /**
-     *
+     *  TO DO: Observer or Broadcast resiver or Handler + Bundel for AddMessage
      *
      * @param text
      */
