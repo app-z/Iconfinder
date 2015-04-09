@@ -8,10 +8,12 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -52,13 +54,13 @@ public class OverlayMessageFragment extends Fragment {
     private SimpleAdapter adapter;
     private ListView listView;
 
-    private final long showTime = 3000;
+    private final long showTime = 5000;
 
     /**
      * Returns a new instance of this fragment
      *
      */
-    public static OverlayMessageFragment newInstance() {
+    public static OverlayMessageFragment newInstance(Bundle bundle) {
         OverlayMessageFragment fragment = new OverlayMessageFragment();
         return fragment;
     }
@@ -84,14 +86,14 @@ public class OverlayMessageFragment extends Fragment {
         listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter)*1.05);
     }
 
-    private void removeFirst(){
+    private void removeMessageOfTimeOut(){
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 if (adapter != null && messages.size() > 0) {
-                    //messages.remove(0);
                     boolean changed = false;
                     synchronized (messages) {
+                        int i=0;    // fu*k! need for getChildAt
                         Iterator<Map<String, Object>> it = messages.iterator();
                         while(it.hasNext()){
                             Map<String, Object> message = it.next();
@@ -100,12 +102,10 @@ public class OverlayMessageFragment extends Fragment {
                             if (ts < System.currentTimeMillis()) {
                                 it.remove();
                                 changed = true;
+                                listView.getChildAt(i).startAnimation(animation2);
                             }
+                            i++;
                         }
-                    }
-                    if(changed) {
-                        adapter.notifyDataSetChanged();
-                        listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
                     }
                 }
             }
@@ -120,7 +120,7 @@ public class OverlayMessageFragment extends Fragment {
         timertask = new TimerTask() {
             @Override
             public void run() {
-                removeFirst();
+                removeMessageOfTimeOut();
             }
         };
         timer = new Timer();
@@ -136,12 +136,31 @@ public class OverlayMessageFragment extends Fragment {
         }
     }
 
+    private Animation animation1;
+    private Animation animation2;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragmet_overlay_message, container, false);
 
         listView = (ListView)rootView.findViewById(R.id.messageListView);
+
+        initAnimation();
+
+
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                synchronized (messages) {
+                    messages.remove(position);
+                }
+                if (DEBUG) Log.e(TAG, "OnItemClickListener : " + position);
+                view.startAnimation(animation1);
+            }
+        });
+
 
         adapter = new SimpleAdapter(getActivity(),
                 messages,
@@ -151,29 +170,25 @@ public class OverlayMessageFragment extends Fragment {
         );
 
         listView.setAdapter(adapter);
-
-        rootView.setClickable(true);
-        rootView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_DOWN){
-                    mCallbacks.onOverlayClick();
-                    if (DEBUG) Log.e(TAG, "click ");
-                }
-                return false;
-            }
-        });
-
         return rootView;
     }
 
     @Override
+    public void onActivityCreated (Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        ((MainActivity) attachActivity).onOverlayCreated();
+    }
+
+    Activity attachActivity;
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        this.attachActivity = activity;
         try {
             mCallbacks = (OverlayMessageFragmentCallbacks) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
+            throw new ClassCastException("Activity must implement OverlayMessageFragment.");
         }
 
         startTimer();
@@ -190,6 +205,51 @@ public class OverlayMessageFragment extends Fragment {
     public static interface OverlayMessageFragmentCallbacks{
         void onOverlayClick();
     }
+
+
+    /**
+     *
+     *
+     */
+    private void initAnimation() {
+        animation1 = AnimationUtils.loadAnimation(getActivity(),
+                R.anim.slide_up);
+        animation2 = AnimationUtils.loadAnimation(getActivity(),
+                R.anim.exit);
+        animation1.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                adapter.notifyDataSetChanged();
+                listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
+            }
+        });
+
+        animation2.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                adapter.notifyDataSetChanged();
+                listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
+            }
+        });
+    }
+
+
 
     // http://stackoverflow.com/questions/6547154/wrap-content-for-a-listviews-width
     /**

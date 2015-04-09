@@ -47,6 +47,8 @@ public class MainActivity extends ActionBarActivity
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
+    private OverlayMessageFragment mOverlayMessageFragment;
+
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
@@ -85,18 +87,32 @@ public class MainActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
+        //DrawerLayout mDL = ((DrawerLayout) findViewById(R.id.drawer_layout));
+        //mDL.openDrawer(findViewById(R.id.overlay));
+
         if(!AppUtils.isNetworkAvailable(this)){
             AppUtils.showDialog(this, "Internet error", "Check internet connection!", true);
         }else {
 
             FragmentManager fragmentManager = getSupportFragmentManager();
             Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-            if ( DEBUG ) Log.d(TAG, "onCreate : currentFragment = " + currentFragment);
+            if ( DEBUG ) Log.d(TAG, "onCreate() : currentFragment = " + currentFragment);
             if (currentFragment == null) {
                 fragmentManager.beginTransaction()
                         .replace(R.id.container,
                                 PlaceholderFragment.newInstance(0, null),
                                 PlaceholderFragment.class.getSimpleName())
+                        .commit();
+            }
+
+            mOverlayMessageFragment = (OverlayMessageFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.overlay);
+            if (DEBUG) Log.d(TAG, "onCreate() : mOverlayMessageFragment = " + mOverlayMessageFragment);
+            if( mOverlayMessageFragment == null ){
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.overlay,
+                                OverlayMessageFragment.newInstance(null),
+                                OverlayMessageFragment.class.getSimpleName())
                         .commit();
             }
 
@@ -106,6 +122,17 @@ public class MainActivity extends ActionBarActivity
             getSupportLoaderManager().restartLoader(DataHolder.LOADER_STYLES_ID, bundle, this);
         }
     }
+
+
+    public void onOverlayCreated() {
+        mOverlayMessageFragment = (OverlayMessageFragment)
+                getSupportFragmentManager().findFragmentById(R.id.overlay);
+
+        if (DEBUG) Log.d(TAG, "onOverlayCreated() : mOverlayMessageFragment = " + mOverlayMessageFragment);
+
+        showOverlay("You are welcome !");
+    }
+
 
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -210,6 +237,11 @@ public class MainActivity extends ActionBarActivity
                         PlaceholderFragment.newInstance(0, null),
                         PlaceholderFragment.class.getSimpleName())
                 .commit();
+        fragmentManager.beginTransaction()
+                .replace(R.id.overlay,
+                        OverlayMessageFragment.newInstance(null),
+                        OverlayMessageFragment.class.getSimpleName())
+                .commit();
     }
 
 
@@ -236,40 +268,36 @@ public class MainActivity extends ActionBarActivity
         }, delay);
     }
 
-    private void showOverlay(String text){
-        Fragment fragment = getSupportFragmentManager().
-                findFragmentByTag(OverlayMessageFragment.class.getSimpleName());
-        if(fragment == null) {
-            Fragment overlayMessageFragment = OverlayMessageFragment.newInstance();
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
-            ft.replace(R.id.overlay, overlayMessageFragment, OverlayMessageFragment.class.getSimpleName());
-            ft.commit();
-        }else {
-            ((OverlayMessageFragment) fragment).addMessage(text);
-        }
-        if (DEBUG) Log.e(TAG, "showOverlay: " + fragment  + " : " + text );
+    /**
+     *
+     *
+     * @param text
+     */
+    private void showOverlay(final String text){
+        // Should be added over Handler!
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+               mOverlayMessageFragment.addMessage(text);
+            }
+        });
+        if (DEBUG) Log.e(TAG, "showOverlay : " + text );
+
     }
 
     @Override
     public void onLoadFinished(final Loader<DataHolder> loader, final DataHolder data) {
-        VolleyError volleyError = data.getError();
+        final VolleyError volleyError = data.getError();
         if (volleyError != null) {
             if (DEBUG) Log.e(TAG, "volleyError message: " + volleyError);
             if( volleyError.getMessage() != null )
-                showOverlay(volleyError.getMessage());
+               showOverlay(volleyError.getMessage());
 
             NetworkResponse networkResponse = volleyError.networkResponse;
             if (networkResponse != null && networkResponse.statusCode == 429) {
                 // HTTP Status Code: 429
                 if (DEBUG) Log.e(TAG, "volleyError statusCode: " + networkResponse.statusCode);
-
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        showOverlay("Server Error 429. Too many requests. Try later");
-                    }
-                });
+                showOverlay("Server Error 429. Too many requests. Try later");
             }
             resetLoadFlagAfterDelay(5000);
             return;
@@ -426,7 +454,7 @@ public class MainActivity extends ActionBarActivity
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingsIntent);
             return true;
         }
