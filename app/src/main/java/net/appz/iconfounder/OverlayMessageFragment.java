@@ -88,7 +88,7 @@ public class OverlayMessageFragment extends Fragment {
 
     private void removeMessageOfTimeOut(){
         if( adapter != null && animation != null
-            && !isAnimationStarted){
+            && !isAnimationStarted && messages.size() > 0){
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
