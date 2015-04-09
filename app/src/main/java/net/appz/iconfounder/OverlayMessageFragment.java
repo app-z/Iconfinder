@@ -87,14 +87,14 @@ public class OverlayMessageFragment extends Fragment {
     }
 
     private void removeMessageOfTimeOut(){
-        if( adapter != null && animation1 != null && animation2 != null
-            && !isAnimation1Started && !isAnimation2Started){
+        if( adapter != null && animation != null
+            && !isAnimationStarted){
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    if ( messages.size() > 0 ) {
-                        boolean changed = false;
-                        synchronized (messages) {
+                    boolean changed = false;
+                    synchronized (messages) {
+                        if ( messages.size() > 0 ) {
                             int i = 0;    // fu*k! need for getChildAt
                             Iterator<Map<String, Object>> it = messages.iterator();
                             while (it.hasNext()) {
@@ -143,8 +143,7 @@ public class OverlayMessageFragment extends Fragment {
         }
     }
 
-    private Animation animation1;
-    private Animation animation2;
+    private Animation animation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -158,11 +157,11 @@ public class OverlayMessageFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                if( !isAnimation1Started && !isAnimation2Started ){
+                if( !isAnimationStarted ){
                     clickPosition = position;
-                    if (DEBUG) Log.e(TAG, "OnItemClickListener : " + position + " : isAnimation1Started = " + isAnimation1Started);
-                    isAnimation1Started = true;
-                    view.startAnimation(animation1);
+                    if (DEBUG) Log.e(TAG, "OnItemClickListener : " + position + " : isAnimationStarted = " + isAnimationStarted);
+                    isAnimationStarted = true;
+                    view.startAnimation(animation);
                 }
             }
         });
@@ -215,27 +214,22 @@ public class OverlayMessageFragment extends Fragment {
         void onOverlayClick();
     }
 
-    boolean isAnimation1Started = false;
-    boolean isAnimation2Started = false;
+    boolean isAnimationStarted = false;
 
     /**
      *
      *
      */
     private void initAnimation() {
-        animation1 = AnimationUtils.loadAnimation(getActivity(),
+        animation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.slide_up);
-        animation2 = AnimationUtils.loadAnimation(getActivity(),
-                R.anim.exit);
-        animation1.setAnimationListener(new Animation.AnimationListener() {
+        animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
             }
-
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
-
             @Override
             public void onAnimationEnd(Animation animation) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -249,30 +243,11 @@ public class OverlayMessageFragment extends Fragment {
                     }
                 });
 
-                isAnimation1Started = false;
-                if (DEBUG) Log.e(TAG, "onAnimation1End : isAnimation1Started = " + isAnimation1Started);
-                if (DEBUG) Log.e(TAG, "onAnimation1End : isAnimation2Started = " + isAnimation2Started);
-
+                isAnimationStarted = false;
+                if (DEBUG) Log.e(TAG, "onAnimation1End : isAnimation2Started = " + isAnimationStarted);
             }
         });
 
-        animation2.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                //listView.getLayoutParams().width = (int) (getWidestView(getActivity(), adapter) * 1.05);
-                isAnimation2Started = false;
-                if (DEBUG) Log.e(TAG, "onAnimation2End : isAnimation1Started = " + isAnimation1Started);
-                if (DEBUG) Log.e(TAG, "onAnimation2End : isAnimation2Started = " + isAnimation2Started);
-            }
-        });
     }
 
 
