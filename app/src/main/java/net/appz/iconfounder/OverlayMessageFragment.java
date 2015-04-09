@@ -67,6 +67,13 @@ public class OverlayMessageFragment extends Fragment {
 
     public OverlayMessageFragment(){}
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // keep the fragment and all its data across screen rotation
+        setRetainInstance(true);
+    }
+
     public void addMessage(String text){
         synchronized (messages) {
             long ts = System.currentTimeMillis();
@@ -100,8 +107,8 @@ public class OverlayMessageFragment extends Fragment {
                             while (it.hasNext()) {
                                 Map<String, Object> message = it.next();
                                 long ts = (long) message.get(TIMESTAMP);
-                                if (DEBUG)
-                                    Log.e(TAG, "ts removed : " + (ts - System.currentTimeMillis()) + " : " + message);
+                                //if (DEBUG)
+                                //    Log.e(TAG, "ts removed : " + (ts - System.currentTimeMillis()) + " : " + message);
                                 if (ts < System.currentTimeMillis()) {
                                     it.remove();
                                     changed = true;
@@ -185,6 +192,14 @@ public class OverlayMessageFragment extends Fragment {
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ((MainActivity) attachActivity).onOverlayCreated();
+        if (DEBUG) Log.e(TAG, "onActivityCreated() " + savedInstanceState);
+
+    }
+
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (DEBUG) Log.e(TAG, "onSaveInstanceState() " + outState);
     }
 
     Activity attachActivity;
@@ -198,6 +213,7 @@ public class OverlayMessageFragment extends Fragment {
         } catch (ClassCastException e) {
             throw new ClassCastException("Activity must implement OverlayMessageFragment.");
         }
+        if (DEBUG) Log.e(TAG, "onAttach() " + activity);
 
        startTimer();
     }
@@ -208,6 +224,7 @@ public class OverlayMessageFragment extends Fragment {
         super.onDetach();
         mCallbacks = null;
         stopTimer();
+        if (DEBUG) Log.e(TAG, "onDetach() ");
     }
 
     public static interface OverlayMessageFragmentCallbacks{
