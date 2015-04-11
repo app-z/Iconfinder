@@ -27,11 +27,12 @@ public class PopUpFragment extends Fragment{
 
     private static final String ARG_TIMER_INTERVAL = "timer_interval";
     private OnFragmentInteractionListener mListener;
-    private HandlerOverlayMessages messageHandler;
+    private HandlerPopUpMessages messageHandler;
 
     private int TIMER_INTERVAL_DEFAULT = 2000;
 
     private int timer_interval;
+
 
     private RecyclerViewAdapter adapter;
     private CardView cardView;
@@ -74,7 +75,7 @@ public class PopUpFragment extends Fragment{
         // keep the fragment and all its data across screen rotation
         //setRetainInstance(true);
 
-        messageHandler = new HandlerOverlayMessages(this);
+        messageHandler = new HandlerPopUpMessages(this);
 
         if (savedInstanceState != null) {
             records = savedInstanceState.getParcelableArrayList(PopUpFragment.class.getSimpleName());
@@ -145,10 +146,10 @@ public class PopUpFragment extends Fragment{
 
     public void addMessage0ToPopUp(int type, String text){
         Bundle msgBundle = new Bundle();
-        msgBundle.putInt(HandlerOverlayMessages.ICON_ARG, type);
-        msgBundle.putString(HandlerOverlayMessages.TEXT_ARG, text);
+        msgBundle.putInt(HandlerPopUpMessages.ICON_ARG, type);
+        msgBundle.putString(HandlerPopUpMessages.TEXT_ARG, text);
         Message msg = new Message();
-        msg.what = HandlerOverlayMessages.ADD_MESSAGE;
+        msg.what = HandlerPopUpMessages.ADD_MESSAGE;
         msg.setData(msgBundle);
         messageHandler.sendMessage(msg);
     }
@@ -156,7 +157,7 @@ public class PopUpFragment extends Fragment{
     public void removeMessagePopUp() {
         Bundle msgBundle = new Bundle();
         Message msg = new Message();
-        msg.what = HandlerOverlayMessages.REMOVE_MESSAGE_0;
+        msg.what = HandlerPopUpMessages.REMOVE_MESSAGE_0;
         msg.setData(msgBundle);
         messageHandler.sendMessage(msg);
     }
@@ -345,7 +346,7 @@ public class PopUpFragment extends Fragment{
         }
     }
 
-    private class HandlerOverlayMessages <T> extends Handler {
+    private class HandlerPopUpMessages <T> extends Handler {
 
         public static final int ADD_MESSAGE = 100;
         public static final int REMOVE_MESSAGE_0 = 101;
@@ -354,7 +355,7 @@ public class PopUpFragment extends Fragment{
 
         private final T fragment;
 
-        public HandlerOverlayMessages(T fragment ){
+        public HandlerPopUpMessages(T fragment ){
             this.fragment = fragment;
         }
 
