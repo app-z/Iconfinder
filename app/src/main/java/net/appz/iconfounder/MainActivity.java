@@ -29,6 +29,8 @@ import net.appz.iconfounder.Data.Icons;
 import net.appz.iconfounder.Data.Iconsets;
 import net.appz.iconfounder.Data.Style;
 import net.appz.iconfounder.Data.Styles;
+import net.appz.iconfounder.popupwidget.fragment.PopUpFragment;
+import net.appz.iconfounder.popupwidget.model.Record;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -37,7 +39,7 @@ import java.util.Random;
 public class MainActivity extends ActionBarActivity
         implements LoaderManager.LoaderCallbacks<DataHolder>,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
-        OverlayMessageFragment.OverlayMessageFragmentCallbacks{
+        PopUpFragment.OnFragmentInteractionListener{
 
     private static final boolean DEBUG = true;
     private String TAG = this.getClass().getSimpleName();
@@ -47,7 +49,7 @@ public class MainActivity extends ActionBarActivity
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
-    private OverlayMessageFragment mOverlayMessageFragment;
+    private PopUpFragment mPopupWidget;
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -105,14 +107,14 @@ public class MainActivity extends ActionBarActivity
                         .commit();
             }
 
-            mOverlayMessageFragment = (OverlayMessageFragment)
-                    getSupportFragmentManager().findFragmentById(R.id.overlay);
-            if (DEBUG) Log.d(TAG, "onCreate() : mOverlayMessageFragment = " + mOverlayMessageFragment);
-            if( mOverlayMessageFragment == null ){
+            mPopupWidget = (PopUpFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.popup);
+            if (DEBUG) Log.d(TAG, "onCreate() : mPopupWidget = " + mPopupWidget);
+            if( mPopupWidget == null ){
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.overlay,
-                                OverlayMessageFragment.newInstance(null),
-                                OverlayMessageFragment.class.getSimpleName())
+                        .replace(R.id.popup,
+                                PopUpFragment.newInstance(),
+                                PopUpFragment.class.getSimpleName())
                         .commit();
             }
 
@@ -123,15 +125,21 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
+    static int cntPopupRestart = 0;
 
-    public void onOverlayCreated() {
-        mOverlayMessageFragment = (OverlayMessageFragment)
-                getSupportFragmentManager().findFragmentById(R.id.overlay);
-
-        if (DEBUG) Log.d(TAG, "onOverlayCreated() : mOverlayMessageFragment = " + mOverlayMessageFragment);
-
-        showOverlay("You are welcome !");
+    @Override
+    public void onPopUpFragmentStart() {
+        mPopupWidget = (PopUpFragment)
+                getSupportFragmentManager().findFragmentById(R.id.popup);
+        if (DEBUG) Log.d(TAG, "onPopUpFragmentStart() : mPopupWidget = " + mPopupWidget);
+        if(cntPopupRestart++ == 0)
+            addMessageToPopUp(Record.Type.GREEN, "You are welcome !");
     }
+
+    void addMessageToPopUp(Record.Type type, String message){
+        mPopupWidget.addMessage0ToPopUp(type.ordinal(), message);
+    }
+
 
 
     @Override
@@ -181,7 +189,8 @@ public class MainActivity extends ActionBarActivity
         if (iconsGridFragment != null) {
             ((IconsGridFragment) iconsGridFragment).addIcons(icons);
             if ( ((IconsGridFragment) iconsGridFragment).getCountItems() == icons.getTotalCount() ){
-                showOverlay("All Icons was loaded");
+                addMessageToPopUp(Record.Type.GREEN, "All Icons was loaded");
+
             }
         } else {
             iconsGridFragment = IconsGridFragment.newInstance(icons);
@@ -237,11 +246,14 @@ public class MainActivity extends ActionBarActivity
                         PlaceholderFragment.newInstance(0, null),
                         PlaceholderFragment.class.getSimpleName())
                 .commit();
-        fragmentManager.beginTransaction()
-                .replace(R.id.overlay,
-                        OverlayMessageFragment.newInstance(null),
-                        OverlayMessageFragment.class.getSimpleName())
-                .commit();
+
+        mPopupWidget = (PopUpFragment)
+                getSupportFragmentManager().findFragmentById(R.id.popup);
+        getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.popup,
+                     PopUpFragment.newInstance(),
+                     PopUpFragment.class.getSimpleName())
+                    .commit();
     }
 
 
@@ -250,11 +262,6 @@ public class MainActivity extends ActionBarActivity
         return new DataLoader(this, args);
     }
 
-
-    @Override
-    public void onOverlayClick() {
-        // Nothing on click
-    }
 
     synchronized private void resetLoadFlagAfterDelay(final int delay) {
         new Handler().postDelayed(new Runnable() {
@@ -268,22 +275,6 @@ public class MainActivity extends ActionBarActivity
         }, delay);
     }
 
-    /**
-     *  TO DO: Observer or Broadcast resiver or Handler + Bundel for AddMessage
-     *
-     * @param text
-     */
-    private void showOverlay(final String text){
-        // Should be added over Handler!
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-               mOverlayMessageFragment.addMessage(text);
-            }
-        });
-        if (DEBUG) Log.e(TAG, "showOverlay : " + text );
-
-    }
 
     @Override
     public void onLoadFinished(final Loader<DataHolder> loader, final DataHolder data) {
@@ -291,13 +282,13 @@ public class MainActivity extends ActionBarActivity
         if (volleyError != null) {
             if (DEBUG) Log.e(TAG, "volleyError message: " + volleyError);
             if( volleyError.getMessage() != null )
-               showOverlay(volleyError.getMessage());
+               addMessageToPopUp(Record.Type.RED, volleyError.getMessage());
 
             NetworkResponse networkResponse = volleyError.networkResponse;
             if (networkResponse != null && networkResponse.statusCode == 429) {
                 // HTTP Status Code: 429
                 if (DEBUG) Log.e(TAG, "volleyError statusCode: " + networkResponse.statusCode);
-                showOverlay("Server Error 429. Too many requests. Try later");
+                addMessageToPopUp(Record.Type.YELLOW, "Server Error 429. Too many requests. Try later");
             }
             resetLoadFlagAfterDelay(5000);
             return;
@@ -368,7 +359,7 @@ public class MainActivity extends ActionBarActivity
      *
      */
     public void onLazyLoadMore() {
-        showOverlay("Loading more from " + offset + ". Wait...");
+        addMessageToPopUp(Record.Type.GREEN, "Loading more from " + offset + ". Wait...");
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String query = prefs.getString("query", "facebook");
         queryIcons(query);
@@ -463,4 +454,14 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+
+    @Override
+    public void onHidePopUpFrugment() {
+
+    }
+
+    @Override
+    public void onShowPopUpFrugment() {
+
+    }
 }

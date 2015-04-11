@@ -191,7 +191,7 @@ public class OverlayMessageFragment extends Fragment {
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ((MainActivity) attachActivity).onOverlayCreated();
+        //((MainActivity) attachActivity).onOverlayCreated();
         if (DEBUG) Log.e(TAG, "onActivityCreated() " + savedInstanceState);
 
     }
