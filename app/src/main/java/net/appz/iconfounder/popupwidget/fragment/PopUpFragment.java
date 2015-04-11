@@ -92,14 +92,22 @@ public class PopUpFragment extends Fragment{
 
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
-
         @Override
         public void run() {
-            removeMessagePopUp();
+            if (adapter.getItemCount() > 0) {
+                Record record = adapter.getRecords().get(0);
+                long ts = record.getTimestamp();
+                if (ts < System.currentTimeMillis() - timer_interval){
+                    if (adapter.getItemCount() > 1){
+                        record = adapter.getRecords().get(1);
+                        record.setTimestamp(System.currentTimeMillis());
+                    }
+                    removeMessagePopUp();
+                }
+            }
             timerHandler.postDelayed(this, timer_interval);
         }
     };
-
 
     @Override
     public void onPause() {
@@ -167,6 +175,7 @@ public class PopUpFragment extends Fragment{
         Record record = new Record();
         record.setName(text);
         record.setType(Record.Type.values()[type]);
+        record.setTimestamp(System.currentTimeMillis());
         adapter.getRecords().add(record);
         adapter.notifyItemInserted(adapter.getItemCount()-1);
         //adapter.notifyDataSetChanged();

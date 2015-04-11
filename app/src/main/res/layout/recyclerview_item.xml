@@ -20,9 +20,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/recyclerViewItemIcon"
-        android:layout_toEndOf="@+id/recyclerViewItemIcon"
+        android:layout_toLeftOf="@+id/recyclerViewItemDeleteButton"
         android:layout_centerVertical="true"
-        tools:text="name"
+        tools:text="name name name name name name na me na me na me na me na me na me name name name name name name name name name name name name name"
         android:textSize="20sp"/>
 
     <Button

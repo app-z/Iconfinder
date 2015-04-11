@@ -1,4 +1,4 @@
-package net.appz.iconfounder;
+package net.appz.iconfounder.popupwidget.depricated;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,6 +17,8 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import net.appz.iconfounder.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
