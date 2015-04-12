@@ -14,6 +14,16 @@ public class Record implements Parcelable {
     private String name;
     private Type type;
 
+    private long timestamp;
+
+    public long getTimestamp(){
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp){
+        this.timestamp = timestamp;
+    }
+
     public String getName() {
         return name;
     }
