@@ -71,6 +71,9 @@ public class MainActivity extends ActionBarActivity
 
     private Styles styles;
 
+    private int cntPopupRestart = 0;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +81,7 @@ public class MainActivity extends ActionBarActivity
         if (savedInstanceState != null){
             offset = savedInstanceState.getInt("offset");
             stylesPosition = savedInstanceState.getInt("stylesPosition");
+            cntPopupRestart = savedInstanceState.getInt("cntPopupRestart");
         }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -125,7 +129,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    static int cntPopupRestart = 0;
 
     @Override
     public void onPopUpFragmentStart() {
@@ -147,6 +150,7 @@ public class MainActivity extends ActionBarActivity
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt("offset", offset);
         savedInstanceState.putInt("stylesPosition", stylesPosition);
+        savedInstanceState.putInt("cntPopupRestart", cntPopupRestart);
     }
 
     private void fillStyles(Styles styles) {
